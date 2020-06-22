@@ -7,14 +7,19 @@ SIMULATION_FILE = "../data/dummy.csv"
 NUM_OF_THREADS = 1
 PIPELINE_STAGES = 5
 
-Memory = None
-with open(SIMULATION_FILE) as f:
-    reader = csv.reader(f)
-    Memory = list(reader)
 
+def simulator(memory_file = SIMULATION_FILE,removeHeaders = True):
 
-def simulator():
-    pipeline = Pipeline(NUM_OF_THREADS)
+    Memory = None
+    with open(memory_file) as f:
+        reader = csv.reader(f)
+        Memory = list(reader)
+    if removeHeaders:
+        del Memory[0] #remove headers
+
+    pipeline = Pipeline(NUM_OF_THREADS,PIPELINE_STAGES,Memory)
+    print (pipeline.headers_str())
+
 
 
 
