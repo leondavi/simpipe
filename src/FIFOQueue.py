@@ -15,6 +15,16 @@ class FIFOQueue():
             del self.Qlist[-1]
             return tmp
 
+    def front(self): # returns first out
+        if self.Qlist:
+            return self.Qlist[-1]
+        return None
+
+    def back(self):
+        if self.Qlist:
+            return self.Qlist[0]
+        return None
+
     def len(self):
         return len(self.Qlist)
 

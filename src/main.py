@@ -20,6 +20,9 @@ def simulator(memory_file = SIMULATION_FILE,removeHeaders = True):
     pipeline = Pipeline(NUM_OF_THREADS,PIPELINE_STAGES,Memory)
     print (pipeline.headers_str())
 
+    while pipeline.tick():
+        pass
+
 
 
 

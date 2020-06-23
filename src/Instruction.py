@@ -20,7 +20,6 @@ class Instruction:
 
     @staticmethod
     def inst_from_row(csv_row : list,tid = 0):
-        print(csv_row)
         new_inst = Instruction()
         for idx,val in enumerate(csv_row):
             if idx == CSV_IDX_DICT["pc"]:
