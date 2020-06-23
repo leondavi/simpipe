@@ -1,5 +1,9 @@
 # simpipe
-Pipeline Simulator
+CPU Pipeline Simulator
 
-Python 3.7
-pandas 1.0.5
+## Prerequisites:
+1. Python 3.7
+
+## Usage:
+
+1. An example of a memory input file is located at data directory. 
