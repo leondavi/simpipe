@@ -1,28 +1,54 @@
 
 
 from FIFOQueue import FIFOQueue
-from Instruction import Instruction
+from Instruction import *
 from Definitions import *
 
 class Fetch:
+
+
     def __init__(self,tid,Memory,fetchSize,QueueSize = DEFAULT_FETCH_QUEUE_SIZE,initMemPtr = 0,initMemEndPtr = None):
         self.tid = tid
         self.fetchQueue = FIFOQueue(QueueSize)
         self.NextInstMemPtr = initMemPtr
         self.MaxPtr = initMemEndPtr
+        self.initMemPtr = initMemPtr
         self.memory = Memory
-        self.fetchSize = fetchSize
+        self.fetchSize = fetchSize # Max number of instructions to fetch from memory
 
     def setMemPtr(self,PtrVal : int):
         self.NextInstMemPtr = PtrVal
 
     def fetch(self):
-        if self.ptr_within_mem_range(self.NextInstMemPtr):
-            curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr])
-            self.fetchQueue.push(curr_inst)
-            self.NextInstMemPtr+=1
-            return True
-        return False
+        if  not self.ptr_within_mem_range(self.NextInstMemPtr):
+            return False
+
+        first_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr])
+        self.fetchQueue.push(first_inst)
+        self.NextInstMemPtr += 1
+
+        # Calculate based on the current offset where the instruction located in the line
+        maxFetchSize =  self.fetchSize - ((first_inst.pc/INSTRUCTION_SIZE) % self.fetchSize) - 1
+
+        former_inst = first_inst
+        empty_inst = False
+        for i in range (0,maxFetchSize):
+            if not self.ptr_within_mem_range(self.NextInstMemPtr):
+                empty_inst = True
+            else:
+                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr])
+                delta_pc = curr_inst.delta_pc(former_inst)
+                if delta_pc != INSTRUCTION_SIZE:
+                    empty_inst = True
+                else:
+                    self.fetchQueue.push(curr_inst)
+                    self.NextInstMemPtr += 1
+                    former_inst = curr_inst
+
+            if empty_inst:
+                self.fetchQueue.push(Instruction.empty_inst(self.tid))
+
+        return True
 
     def end_of_memory(self): # not within range
         return not self.ptr_within_mem_range(self.NextInstMemPtr)
@@ -30,12 +56,14 @@ class Fetch:
     def get_Queue(self):
         return self.fetchQueue
 
-    def ptr_within_mem_range(self,ptrVal : int):
+    def ptr_within_mem_range(self,ptrval:int):
+        if self.initMemPtr > ptrval:
+            return False
         if self.MaxPtr:
-            if (ptrVal < len(self.memory)) and (ptrVal < self.MaxPtr):
+            if (ptrval < len(self.memory)) and (ptrval < self.MaxPtr):
                 return True
         else: #Max Ptr isn't defined
-            if (ptrVal < len(self.memory)):
+            if (ptrval < len(self.memory)):
                 return True
         return False
 
