@@ -1,29 +1,31 @@
 
 
-CSV_IDX_DICT = {"pc":1,"inst_name":7,"br_taken":8}
+CSV_IDX_DICT = {"pc": 1, "inst_name": 7, "br_taken": 8}
 
 
 class Instruction:
 
-    def __init__(self,tid=-1,pc="",inst_name="",attributes="",emptyInst=False):
+    def __init__(self, tid=0, pc="", inst_name="x", attributes="", empty_inst=True):
         self.pc = pc
         self.inst_name = inst_name
         self.attributes = attributes
         self.tid = tid
-        self.emptyInst = emptyInst
+        self.empty_inst = empty_inst
         self.br_taken = False
         self.anomaly = False
 
     def str(self):
-        return "TH"+str(self.tid)+"-"+self.inst_name
+        return "T"+str(self.tid)+"-"+("x" if self.empty_inst else self.inst_name)
 
     def empty(self):
         return self.emptyInst
 
     @staticmethod
-    def inst_from_row(csv_row : list,tid = 0):
+    def inst_from_row(csv_row: list,tid):
         new_inst = Instruction()
-        for idx,val in enumerate(csv_row):
+        new_inst.empty_inst = False
+        new_inst.tid = tid
+        for idx, val in enumerate(csv_row):
             if idx == CSV_IDX_DICT["pc"]:
                 new_inst.pc = val
             elif idx == CSV_IDX_DICT["inst_name"]:
@@ -34,10 +36,10 @@ class Instruction:
 
     @staticmethod
     def empty_inst(tid):
-        return Instruction(tid,"","","",True)
+        return Instruction(tid, "Z", "", "", True)
 
-    def delta_pc(self,inst):
-        return abs(self.pc - inst.pc)
+    def delta_pc(self, inst):
+        return abs(int(self.pc) - int(inst.pc))
 
 
 

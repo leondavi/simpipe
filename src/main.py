@@ -1,29 +1,24 @@
 
 import csv
 from Pipeline import Pipeline
+from Definitions import *
 
 
-SIMULATION_FILE = "../data/dummy.csv"
-NUM_OF_THREADS = 1
-PIPELINE_STAGES = 5
+def simulator(memory_file=SIMULATION_FILE, remove_headers=True):
+    memory = None
 
-
-def simulator(memory_file = SIMULATION_FILE,removeHeaders = True):
-
-    Memory = None
     with open(memory_file) as f:
         reader = csv.reader(f)
-        Memory = list(reader)
-    if removeHeaders:
-        del Memory[0] #remove headers
+        memory = list(reader)
+    if remove_headers:
+        del memory[0]  # Remove headers
 
-    pipeline = Pipeline(NUM_OF_THREADS,PIPELINE_STAGES,Memory)
-    print (pipeline.headers_str())
+    pipeline = Pipeline(NUM_OF_THREADS, PIPELINE_STAGES, memory)
+    print(pipeline.headers_str())
 
-    while pipeline.tick():
-        pass
-
-
+    cur_tick = 0
+    while pipeline.tick(cur_tick):
+        cur_tick += 1
 
 
 simulator()

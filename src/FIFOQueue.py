@@ -1,43 +1,44 @@
 
-
-
-class FIFOQueue():
-    def __init__(self,size="inf"):
-        self.Qlist = []
+class FIFOQueue:
+    def __init__(self, size="inf"):
+        self.q_list = []
         self.size = size
 
-    def set_Qlist(self,input_list : list):
-        self.Qlist = input_list
+    def set_q_list(self, input_list: list):
+        self.q_list = input_list
 
     def pop(self):
-        if self.Qlist:
-            tmp = self.Qlist[-1]
-            del self.Qlist[-1]
+        if self.q_list:
+            tmp = self.q_list[-1]
+            del self.q_list[-1]
             return tmp
 
-    def front(self): # returns first out
-        if self.Qlist:
-            return self.Qlist[-1]
+    def front(self):  # returns first out
+        if self.q_list:
+            return self.q_list[-1]
         return None
 
     def back(self):
-        if self.Qlist:
-            return self.Qlist[0]
+        if self.q_list:
+            return self.q_list[0]
         return None
 
     def len(self):
-        return len(self.Qlist)
+        return len(self.q_list)
 
-    def push(self,data):
+    def space(self):
+        return self.size - self.len()
+
+    def push(self, data):
         '''
         retur True if succeed and False if list passed the allowed size
         '''
-        if len(self.Qlist)+1 < self.size:
-            self.Qlist.insert(0,data)
+        if len(self.q_list)+1 <= self.size:
+            self.q_list.insert(0, data)
             return True
         else:
-            self.Qlist.insert(0,data)
-            del self.Qlist[-1]
+            self.q_list.insert(0, data)
+            del self.q_list[-1]
 
 
 
