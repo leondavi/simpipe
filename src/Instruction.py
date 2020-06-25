@@ -18,10 +18,10 @@ class Instruction:
         return "T"+str(self.tid)+"-"+("x" if self.empty_inst else self.inst_name)
 
     def empty(self):
-        return self.emptyInst
+        return self.empty_inst
 
     @staticmethod
-    def inst_from_row(csv_row: list,tid):
+    def inst_from_row(csv_row: list, tid):
         new_inst = Instruction()
         new_inst.empty_inst = False
         new_inst.tid = tid
@@ -40,6 +40,3 @@ class Instruction:
 
     def delta_pc(self, inst):
         return abs(int(self.pc) - int(inst.pc))
-
-
-

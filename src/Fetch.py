@@ -5,12 +5,12 @@ from Definitions import *
 
 class Fetch:
 
-    def __init__(self, tid, memory, fetch_size, queue_size=DEFAULT_FETCH_QUEUE_SIZE,
-                 prefetch_delay=DEFAULT_PREFETCH_DELAY, init_mem_ptr=0, init_mem_end_ptr=None):
+    def __init__(self, tid: int, memory, fetch_size, queue_size=DEFAULT_FETCH_QUEUE_SIZE,
+                 prefetch_delay=DEFAULT_PREFETCH_DELAY, init_mem_ptr=0):
         self.tid = tid
         self.fetchQueue = FIFOQueue(queue_size)
         self.NextInstMemPtr = init_mem_ptr
-        self.MaxPtr = init_mem_end_ptr
+        self.MaxPtr = len(memory)
         self.initMemPtr = init_mem_ptr
         self.memory = memory
         self.fetch_size = fetch_size  # Max number of instructions to fetch from memory
@@ -19,7 +19,7 @@ class Fetch:
         self.prefetch_delay = prefetch_delay
         self.prefetch_cycle = 0
 
-    def set_mem_ptr(self, ptr_val:int):
+    def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
 
     def fetch(self):
@@ -45,7 +45,7 @@ class Fetch:
             if not self.ptr_within_mem_range(self.NextInstMemPtr):
                 empty_inst = True
             else:
-                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr],self.tid)
+                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid)
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != INSTRUCTION_SIZE:
@@ -74,8 +74,8 @@ class Fetch:
 
     # return if allowed to schedule for pre-fetching
     def check_prefetch(self):
-        # Check if there is already prefetch ongoing
-        if self.prefetch_ongoing:
+        # Check if there is already prefetch ongoing, or all instruction are done
+        if self.prefetch_ongoing or self.mem_done():
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -83,7 +83,7 @@ class Fetch:
     def end_of_memory(self):  # not within range
         return not self.ptr_within_mem_range(self.NextInstMemPtr)
 
-    def get_Queue(self):
+    def get_queue(self):
         return self.fetchQueue
 
     def ptr_within_mem_range(self, ptr_val: int):
@@ -97,4 +97,8 @@ class Fetch:
                 return True
         return False
 
+    def mem_done(self):
+        return self.NextInstMemPtr >= self.MaxPtr
 
+    def fetch_done(self):
+        return self.mem_done() and (not self.prefetch_ongoing) and (self.fetchQueue.len() == 0)

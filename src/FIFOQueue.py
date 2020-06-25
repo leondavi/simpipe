@@ -1,6 +1,6 @@
 
 class FIFOQueue:
-    def __init__(self, size="inf"):
+    def __init__(self, size: int):
         self.q_list = []
         self.size = size
 
@@ -30,15 +30,9 @@ class FIFOQueue:
         return self.size - self.len()
 
     def push(self, data):
-        '''
-        retur True if succeed and False if list passed the allowed size
-        '''
         if len(self.q_list)+1 <= self.size:
             self.q_list.insert(0, data)
             return True
         else:
             self.q_list.insert(0, data)
             del self.q_list[-1]
-
-
-
