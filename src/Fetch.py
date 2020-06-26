@@ -29,7 +29,7 @@ class Fetch:
             return False
 
         # First instruction must be pushed and update the pointers
-        first_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid)
+        first_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid, self.NextInstMemPtr)
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
 
@@ -45,7 +45,7 @@ class Fetch:
             if not self.ptr_within_mem_range(self.NextInstMemPtr):
                 empty_inst = True
             else:
-                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid)
+                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid, self.NextInstMemPtr)
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != INSTRUCTION_SIZE:
@@ -57,7 +57,7 @@ class Fetch:
 
             # None were pushed, create an empty instruction
             if empty_inst:
-                self.fetchQueue.push(Instruction.empty_inst(self.tid))
+                self.fetchQueue.push(Instruction.empty_inst(self.tid, "dummy", False))
 
         return True
 
@@ -80,12 +80,6 @@ class Fetch:
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
 
-    def end_of_memory(self):  # not within range
-        return not self.ptr_within_mem_range(self.NextInstMemPtr)
-
-    def get_queue(self):
-        return self.fetchQueue
-
     def ptr_within_mem_range(self, ptr_val: int):
         if self.initMemPtr > ptr_val:
             return False
@@ -102,3 +96,8 @@ class Fetch:
 
     def fetch_done(self):
         return self.mem_done() and (not self.prefetch_ongoing) and (self.fetchQueue.len() == 0)
+
+    def flush_fetch(self, next_num):
+        self.fetchQueue.flush()
+        self.NextInstMemPtr = next_num
+        self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?

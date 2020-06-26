@@ -11,7 +11,7 @@ def simulator(memory_file=SIMULATION_FILE, remove_headers=True):
     if remove_headers:
         del memory[0]  # Remove headers
 
-    pipeline = Pipeline(memory, NUM_THREADS, NUM_STAGES)
+    pipeline = Pipeline(memory[::-1], NUM_THREADS, NUM_STAGES)
     print(pipeline.headers_str())
 
     cur_tick = 0

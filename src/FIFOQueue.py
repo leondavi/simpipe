@@ -36,3 +36,6 @@ class FIFOQueue:
         else:
             self.q_list.insert(0, data)
             del self.q_list[-1]
+
+    def flush(self):
+        self.q_list = []
