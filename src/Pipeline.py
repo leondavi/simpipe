@@ -4,18 +4,22 @@ from Fetch import *
 class Pipeline:
     # arg
     # fetch_size - Number of instruction that fetch brings from memory each time
-    def __init__(self, memory, num_threads=NUM_THREADS, num_stages=NUM_STAGES, fetch_size=DEFAULT_FETCH_SIZE):
+    def __init__(self, memory, num_threads=NUM_THREADS, num_stages=NUM_STAGES, fetch_size=DEFAULT_FETCH_SIZE,
+                 issue_policy=ISSUE_POLICY):
         self.fetchUnits = [Fetch(tid, memory, fetch_size) for tid in range(0, num_threads)]  # Create fetch unit
         self.stages = FIFOQueue(num_stages)
         self.stages.set_q_list([Instruction.empty_inst(0)] * num_stages)
         self.wb_inst = Instruction.empty_inst(0)
         self.num_threads = num_threads
+        self.issue_policy = issue_policy
         self.tid_issue_ptr = 0
         self.tid_prefetch_vld = False
         self.tid_prefetch_ptr = 0
         self.dependency_status = [0 for _ in range(0, num_threads)]
         self.fetch_policy_func = self.round_robin
         self.timer = DEFAULT_TIMEOUT  # TODO Create timer in case no instruction are done for some latency
+        # Statistics
+        self.inst_committed = 0
 
     def headers_str(self):  # TODO - update the pipe EX as the remain instruction,WB=last commit/dropped inst from queue
         return ["Time"]+["Next Fetch"] + ["Q"+str(n) for n in range(0, self.num_threads)] + ["IS", "DE", "EX", "WB"]
@@ -42,13 +46,16 @@ class Pipeline:
         # commit the instruction
         self.set_commit()
 
+        # Update dependency
         self.update_dependency(cur_tick)
+
+        # Update simulation statistics
+        self.update_statistics(cur_tick)
 
         # Progress Fetch
         for idx in range(0, self.num_threads):
             self.fetchUnits[idx].tick(cur_tick)
-        if self.timer == 0:
-            return False
+
         self.timer -= 1
 
         self.print_tick(cur_tick)
@@ -65,11 +72,18 @@ class Pipeline:
 
     # Select between all thread who is next to issue his instruction
     def set_issue(self, cur_tick):
+        # Check with queue got instructions
         fetch_list = [self.fetchUnits[i].fetchQueue.len() != 0 for i in range(0, self.num_threads)]
+        # Check if there are some dependency
         dependency_list = self.get_dependency(cur_tick)
+        # Merge the two vectors above
         req_list = [fetch_list[i] and dependency_list[i] for i in range(0, self.num_threads)]
-        self.wb_inst = self.stages.front()
+        # update based on the policy
+        self.update_issue_policy()
+        # Select issue thread
         self.tid_issue_ptr = self.round_robin(self.tid_issue_ptr, req_list, self.num_threads)
+        self.wb_inst = self.stages.front()
+
         if req_list[self.tid_issue_ptr]:
             inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.pop()
             self.stages.push(inst)
@@ -83,11 +97,20 @@ class Pipeline:
 
     def update_dependency(self, cur_tick):
         inst = self.stages.back()
-        if inst.got_dependency():
+        if inst.got_dependency() and (not SPECULATIVE):
             self.dependency_status[inst.tid] = cur_tick+self.stages.size
 
     def get_dependency(self, cur_tick):
         return [self.dependency_status[i] <= cur_tick for i in range(0, self.num_threads)]
+
+    def update_statistics(self, cur_tick):
+        # count how many valid instruction committed
+        self.last_tick = cur_tick
+        if not self.wb_inst.empty_inst:
+            self.inst_committed += 1
+
+    def report_statistics(self):
+        print("Inst Committed {0} ipc {1:.3f}".format(self.inst_committed, float(self.inst_committed/self.last_tick)))
 
     def flush_pipe(self, tid, cur_num):
         for i in range(0, self.stages.size-1):
@@ -95,8 +118,23 @@ class Pipeline:
                 self.stages.q_list[i].empty_inst = True
         self.fetchUnits[tid].flush_fetch(cur_num+1)
 
-    def set_fetch_policy(self, policy):
-        self.fetch_policy_func = policy
+    def update_issue_policy(self):
+        if ISSUE_POLICY == "EVENT":
+            self.event_policy()
+        elif ISSUE_POLICY == "COARSE":
+            self.coarse_policy()
+        elif ISSUE_POLICY == "RR":
+            pass
+
+    def event_policy(self):
+        if self.fetchUnits[self.tid_issue_ptr].fetchQueue.len() != 0:
+            next_inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.front()
+            if next_inst.got_dependency():
+                print("EVENT TEST")
+                self.tid_issue_ptr = (self.tid_issue_ptr-1) % self.num_threads
+
+    def coarse_policy(self):
+        self.tid_issue_ptr = (self.tid_issue_ptr - 1) % self.num_threads
 
     # policies
     @staticmethod
