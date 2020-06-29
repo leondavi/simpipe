@@ -1,6 +1,6 @@
 
 import csv
-import os
+import pathlib
 from idlelib import run
 import sys
 
@@ -65,7 +65,14 @@ class MainRun:
 
 
 def run_rgr():
-    mem_params = mem_params_from_args(args_params)
+    mem_params = mem_params_from_args()
+    mem_path = pathlib.Path(mem_params['mem_path'])
+    file_path = mem_path.parents[0] / "results.csv"
+    print(file_path)
+
+    csvfile = open(file_path, 'w', newline='')
+    report_writer = csv.writer(csvfile)
+
     # generate permutations
     num_thread_list = [1, 2, 4]
     issue_policy_list = ["RR", "COARSE", "EVENT"]
@@ -78,7 +85,7 @@ def run_rgr():
             ["PREFETCH_DELAY", prefetch_delay_list]]
 
     rgr_db = RegressionPermutation(rgr)
-
+    report_writer.writerow(rgr_db.key_list + ["IPC"])
     for perm_list in rgr_db.perm_list_of_lists:
         params_dict = dict()
         params_list = list()
@@ -87,12 +94,15 @@ def run_rgr():
             params_dict[key] = val
             params_list.append(val)
 
-        x = MainRun(mem_params,params_dict)
+        x = MainRun(mem_params, params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
         # x.pipeline.report_model()
-        print(",".join(params_list))
+
+        report_writer.writerow(params_list)
         del x, params_dict, params_list
+
+    csvfile.close()
 
 
 def run_single():
