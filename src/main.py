@@ -94,14 +94,14 @@ def run_rgr():
 
 
 def run_single():
-    mem_params = mem_params_from_args(args_params)
+    mem_params = mem_params_from_args()
 
     x = MainRun(mem_params)
     x.simulator()
     print(x.pipeline.ipc)
 
 
-def mem_params_from_args(args_params):
+def mem_params_from_args():
     mem_params = MEM_DICT
     if 'dir' in args_params:
         mem_params['mem_path'] = args_params['dir']
