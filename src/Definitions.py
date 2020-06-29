@@ -4,11 +4,11 @@ VERSION = "1.0"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
 
-NUM_THREADS = 4
+NUM_THREADS = 1
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False]
 ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT"]
-VERB_ON = False
+VERB_ON = True
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
@@ -16,6 +16,8 @@ PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
 DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will turn it off
+
+MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 OPCODE = {
     "0110111": "LUI",
@@ -41,20 +43,12 @@ ALU = {0: "ADD_SUB", 1: "SLL", 2: "SLT", 3: "SLTU", 4: "XOR", 5: "SR", 6: "OR", 
 ADD_SUB = {0: "ADD", 1: "SUB"}
 SR = {0: "SRL", 1: "SRA"}
 
-# Next tasks:
-#  1. Identify flushes and remove the thread from pipeline+clean fetch queue + set new ptr                      DONE
-#  2. Create some hazard/dependency mechanism - delay for memory instruction, long latency instruction,
-#     branch stalls for hint based mechanism                                                            ONGOING-see(3)
-#  3. WB stage- write what instruction ended - this also requires a statistic mechanism to report how many
-#     instruction ended, also can write how many instruction flushed from the IQ(Good for David).       ONGOING-see(4)
-#  4. In order to do 2/3 need to create instruction analyses method                                     ONGOING-see(5)
-#  5. timer for end of simulation termination in case of error+end of test check
-#  6. Low verbosity report for high-speed simulation
-#  7. Create a mechanism that allow to transfer parameters to simulation
-#  8. Organize prints (Do it as David likes).
-# 06.26
-#  1. need to inverse the csv + load a pieces of application - currently I flip the memory
-#  2. Add inst num, to follow the branch scenario                                                                DONE
-#  3. Need to extract all branch scenarios
-#  4. Create some statistic report in the end
-#  5. run some test - and extract all branch based on taken bit.
+# Extra
+#  - Check how many instructions were flushed when using different mechanisms
+#  - Timer for end of simulation termination in case of error+end of test check
+#  - print - simulation progress every tick cycles - [YE]
+#  - Change verbosity method to level sensitive - [YE]
+#  - print to CSV pipeline, and rgr
+#  - Anomaly detection influence inside the pipeline - [David]
+
+

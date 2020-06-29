@@ -9,38 +9,37 @@ from Pipeline import Pipeline
 from Definitions import *
 from RegressionPermutation import *
 
-MEM_DICT = {'mem_path':SIMULATION_FILE,'ptrMax':None}
 
 class MainRun:
 
-    def __init__(self,mem_params = dict(),pipeline_params=dict()):
+    def __init__(self, mem_params: dict, pipeline_params=dict()):
         self.memory = None
         self.load_mem(mem_params)
         self.pipeline = Pipeline(self.memory, pipeline_params)
-        pass
 
     @staticmethod
-    def is_header(mem_list_row : list):
+    def is_header(mem_list_row: list):
         if not mem_list_row[0].isnumeric():
             return True
 
     @staticmethod
-    def fix_revesed_memory(memory_sector : list):
+    def fix_reversed_memory(memory_sector: list):
         if int(memory_sector[0][0]) > int(memory_sector[-1][0]):
             memory_sector = memory_sector[::-1]
         return memory_sector
 
-    def load_mem(self, mem_params : dict, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
+    def load_mem(self, mem_params : dict, table_prefix = DEAFULT_TABLE_PREFIX ):
         csv_files = list()
         mem_path = mem_params['mem_path']
         max_ptr = mem_params['ptrMax']
         if mem_path.endswith("csv"):
             csv_files = [mem_path]
-        else:  # multiple csvs
+        else:  # multiple CSV
             files = os.listdir(mem_path)
-            csv_files = [(int(file.split(".")[0].split("_")[-1]),file) for file in files if file.endswith("csv") and file.startswith(table_prefix)]
+            csv_files = [(int(file.split(".")[0].split("_")[-1]), file)
+                         for file in files if file.endswith("csv") and file.startswith(table_prefix)]
             csv_files.sort()
-            csv_files = [os.path.join(mem_path,file[1]) for file in csv_files]
+            csv_files = [os.path.join(mem_path, file[1]) for file in csv_files]
 
         self.memory = []
         for csv_table_path in csv_files:
@@ -50,9 +49,12 @@ class MainRun:
                 if self.is_header(new_memory_sector[0]):
                     Instruction.csv_keys = {val: idx for idx, val in enumerate(new_memory_sector[0])}
                     del new_memory_sector[0]
-                new_memory_sector = self.fix_revesed_memory(new_memory_sector)
+                new_memory_sector = self.fix_reversed_memory(new_memory_sector)
                 self.memory += new_memory_sector
             f.close()
+            if max_ptr and len(self.memory) >= max_ptr:
+                self.memory = self.memory[0:max_ptr]
+                return
 
     def simulator(self):
         cur_tick = 0
@@ -111,11 +113,11 @@ def mem_params_from_args():
     return mem_params
 
 
-
 def bool_arg_parsing(input_str):
     return True if (input_str == "True" or input_str == "1") else False
 
-def help():
+
+def print_help():
     print("\nSimpipe Help Menu\n-------------------\n")
     print("Version: "+VERSION)
     print("<Option>=<Values>")
@@ -133,23 +135,25 @@ if __name__ == '__main__':
     args_params["single"] = False
     args_params["reg"] = False
     args_params["verbose"] = False
+    args_params["csv_output"] = False
     args_params["dir"] = SIMULATION_FILE
     args_params["ptrMax"] = None
 
     for arg in sys.argv[1:]:
-       if arg.startswith("dir="):
-           args_params["dir"] = arg.split("=")[1]
-       elif arg.startswith("single="):
-           args_params["single"] = bool_arg_parsing(arg.split("=")[1])
-       elif arg.startswith("reg="):
-           args_params["reg"] = bool_arg_parsing(arg.split("=")[1])
-       elif arg.startswith("--help"):
-           help()
-       elif arg.startswith("verbose="):
-           args_params["verbose"] = bool_arg_parsing(arg.split("=")[1])
-       elif arg.startswith("ptrMax="):
-           args_params["ptrMax"] = int(arg.split("=")[1])
-
+        if arg.startswith("dir="):
+            args_params["dir"] = arg.split("=")[1]
+        elif arg.startswith("single="):
+            args_params["single"] = bool_arg_parsing(arg.split("=")[1])
+        elif arg.startswith("reg="):
+            args_params["reg"] = bool_arg_parsing(arg.split("=")[1])
+        elif arg.startswith("--help"):
+            print_help()
+        elif arg.startswith("verbose="):
+            args_params["verbose"] = bool_arg_parsing(arg.split("=")[1])
+        elif arg.startswith("csv_output="):
+            args_params["csv_output"] = bool_arg_parsing(arg.split("=")[1])
+        elif arg.startswith("ptrMax="):
+            args_params["ptrMax"] = int(arg.split("=")[1])
 
     if args_params["single"]:
         run_single()
