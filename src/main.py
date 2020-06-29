@@ -15,8 +15,19 @@ class MainRun:
     def __init__(self, mem_path = SIMULATION_FILE,params=dict()):
         self.memory = None
         self.load_mem(mem_path)
-        self.pipeline = Pipeline(self.memory[::-1], params)
+        self.pipeline = Pipeline(self.memory, params)
         pass
+
+    @staticmethod
+    def is_header(mem_list_row : list):
+        if not mem_list_row[0].isnumeric():
+            return True
+
+    @staticmethod
+    def fix_revesed_memory(memory_sector : list):
+        if int(memory_sector[0][0]) > int(memory_sector[-1][0]):
+            memory_sector = memory_sector[::-1]
+        return memory_sector
 
     def load_mem(self, mem_path, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
         csv_tables = []
@@ -24,15 +35,21 @@ class MainRun:
             csv_tables = [mem_path]
         else: #multiple csvs
             files = os.listdir(mem_path)
-            csv_files = [file for file in files if file.endswith("csv") and file.startswith(table_prefix)]
+            csv_files = [(int(file.split(".")[0].split("_")[-1]),file) for file in files if file.endswith("csv") and file.startswith(table_prefix)]
+            csv_files.sort()
+            csv_files = [os.path.join(mem_path,file[1]) for file in csv_files]
 
-        with open(mem_path) as f:
-            reader = csv.reader(f)
-            self.memory = list(reader)
-        if remove_headers:
-            Instruction.csv_keys = {val: idx for idx, val in enumerate(self.memory[0])}
-            del self.memory[0]  # Remove headers
-        f.close()
+        self.memory = []
+        for csv_table_path in csv_files:
+            with open(csv_table_path) as f:
+                reader = csv.reader(f)
+                new_memory_sector = list(reader)
+                if self.is_header(new_memory_sector[0]):
+                    Instruction.csv_keys = {val: idx for idx, val in enumerate(new_memory_sector[0])}
+                    del new_memory_sector[0]
+                new_memory_sector = self.fix_revesed_memory(new_memory_sector)
+                self.memory += new_memory_sector
+            f.close()
 
     def simulator(self):
         cur_tick = 0
@@ -42,7 +59,7 @@ class MainRun:
         self.pipeline.report_statistics()
 
 
-def run_rgr(mem_path = SIMULATION_FILE):
+def run_rgr(mem_path = SIMULATION_FILE,verbose = False):
     # generate permutations
     num_thread_list = [1, 2, 4]
     issue_policy_list = ["RR", "COARSE", "EVENT"]
@@ -72,7 +89,7 @@ def run_rgr(mem_path = SIMULATION_FILE):
         del x, params_dict, params_list
 
 
-def run_single(mem_path = SIMULATION_FILE):
+def run_single(mem_path = SIMULATION_FILE,verbose = False):
     x = MainRun(mem_path)
     x.simulator()
     x.pipeline.ipc
@@ -82,11 +99,23 @@ def run_single(mem_path = SIMULATION_FILE):
 def bool_arg_parsing(input_str):
     return True if (input_str == "True" or input_str == "1") else False
 
+def help():
+    print("\nSimpipe Help Menu\n-------------------\n")
+    print("Version: "+VERSION)
+    print("<Option>=<Values>")
+    print("Option           Value                Info")
+    print("dir               str                 directory of csv tables OR csv file of memory")
+    print("single         True/False             Running simple simulation of single run of default parameters")
+    print("reg            True/False             Running regression simulation from configuration file of parameters")
+    print("verbose        True/False             Pipeline verbosity")
+
+
 args_params = dict()
 if __name__ == '__main__':
 
     args_params["single"] = False
     args_params["reg"] = False
+    args_params["verbose"] = False
     args_params["dir"] = SIMULATION_FILE
 
     for arg in sys.argv[1:]:
@@ -96,9 +125,16 @@ if __name__ == '__main__':
            args_params["single"] = bool_arg_parsing(arg.split("=")[1])
        elif arg.startswith("reg="):
            args_params["reg"] = bool_arg_parsing(arg.split("=")[1])
+       elif arg.startswith("--help"):
+           help()
+       elif arg.startswith("verbose="):
+           args_params["verbose"] = bool_arg_parsing(arg.split("=")[1])
+
 
     if args_params["single"]:
-        run_single(args_params["dir"])
+        run_single(args_params["dir"],args_params["verbose"])
     elif args_params["reg"]:
-        run_rgr(args_params["dir"])
+        run_rgr(args_params["dir"],args_params["verbose"])
+
+
 

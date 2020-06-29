@@ -1,3 +1,4 @@
+VERSION = "1.0"
 
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
