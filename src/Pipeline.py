@@ -125,11 +125,11 @@ class Pipeline:
         self.fetchUnits[tid].flush_fetch(cur_num+1)
 
     def update_issue_policy(self):
-        if ISSUE_POLICY == "EVENT":
+        if self.issue_policy == "EVENT":
             self.event_policy()
-        elif ISSUE_POLICY == "COARSE":
+        elif self.issue_policy == "COARSE":
             self.coarse_policy()
-        elif ISSUE_POLICY == "RR":
+        elif self.issue_policy == "RR":
             pass
 
     def event_policy(self):

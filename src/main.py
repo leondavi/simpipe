@@ -35,6 +35,7 @@ class MainRun:
 
 
 def run_rgr():
+    # generate permutations
     num_thread_list = [1, 2, 4]
     issue_policy_list = ["RR", "COARSE", "EVENT"]
     speculative_list = [False, True]
@@ -69,7 +70,7 @@ def run_single():
     x.pipeline.ipc
 
 
-# run_single()
+#run_single()
 run_rgr()
 
 

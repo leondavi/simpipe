@@ -5,7 +5,7 @@ SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False]
-ISSUE_POLICY = "COARSE"  # ["RR", "COARSE", "EVENT"]
+ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT"]
 VERB_ON = False
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
