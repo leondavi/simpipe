@@ -9,13 +9,14 @@ from Pipeline import Pipeline
 from Definitions import *
 from RegressionPermutation import *
 
+MEM_DICT = {'mem_path':SIMULATION_FILE,'ptrMax':None}
 
 class MainRun:
 
-    def __init__(self, mem_path = SIMULATION_FILE,params=dict()):
+    def __init__(self,mem_params = dict(),pipeline_params=dict()):
         self.memory = None
-        self.load_mem(mem_path)
-        self.pipeline = Pipeline(self.memory, params)
+        self.load_mem(mem_params)
+        self.pipeline = Pipeline(self.memory, pipeline_params)
         pass
 
     @staticmethod
@@ -29,8 +30,10 @@ class MainRun:
             memory_sector = memory_sector[::-1]
         return memory_sector
 
-    def load_mem(self, mem_path, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
+    def load_mem(self, mem_params : dict, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
         csv_files = list()
+        mem_path = mem_params['mem_path']
+        max_ptr = mem_params['ptrMax']
         if mem_path.endswith("csv"):
             csv_files = [mem_path]
         else:  # multiple csvs
@@ -59,7 +62,8 @@ class MainRun:
         self.pipeline.report_statistics()
 
 
-def run_rgr(mem_path = SIMULATION_FILE,verbose = False):
+def run_rgr():
+    mem_params = mem_params_from_args(args_params)
     # generate permutations
     num_thread_list = [1, 2, 4]
     issue_policy_list = ["RR", "COARSE", "EVENT"]
@@ -81,7 +85,7 @@ def run_rgr(mem_path = SIMULATION_FILE,verbose = False):
             params_dict[key] = val
             params_list.append(val)
 
-        x = MainRun(mem_path,params_dict)
+        x = MainRun(mem_params,params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
         # x.pipeline.report_model()
@@ -89,10 +93,22 @@ def run_rgr(mem_path = SIMULATION_FILE,verbose = False):
         del x, params_dict, params_list
 
 
-def run_single(mem_path=SIMULATION_FILE, verbose=False):
-    x = MainRun(mem_path)
+def run_single():
+    mem_params = mem_params_from_args(args_params)
+
+    x = MainRun(mem_params)
     x.simulator()
     print(x.pipeline.ipc)
+
+
+def mem_params_from_args(args_params):
+    mem_params = MEM_DICT
+    if 'dir' in args_params:
+        mem_params['mem_path'] = args_params['dir']
+    if 'ptrMax' in args_params:
+        mem_params['ptrMax'] = args_params['ptrMax']
+
+    return mem_params
 
 
 
@@ -111,12 +127,14 @@ def help():
 
 
 args_params = dict()
+
 if __name__ == '__main__':
 
     args_params["single"] = False
     args_params["reg"] = False
     args_params["verbose"] = False
     args_params["dir"] = SIMULATION_FILE
+    args_params["ptrMax"] = None
 
     for arg in sys.argv[1:]:
        if arg.startswith("dir="):
@@ -129,12 +147,14 @@ if __name__ == '__main__':
            help()
        elif arg.startswith("verbose="):
            args_params["verbose"] = bool_arg_parsing(arg.split("=")[1])
+       elif arg.startswith("ptrMax="):
+           args_params["ptrMax"] = int(arg.split("=")[1])
 
 
     if args_params["single"]:
-        run_single(args_params["dir"], args_params["verbose"])
+        run_single()
     elif args_params["reg"]:
-        run_rgr(args_params["dir"], args_params["verbose"])
+        run_rgr()
 
 
 
