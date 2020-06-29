@@ -30,10 +30,10 @@ class MainRun:
         return memory_sector
 
     def load_mem(self, mem_path, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
-        csv_tables = []
+        csv_files = list()
         if mem_path.endswith("csv"):
-            csv_tables = [mem_path]
-        else: #multiple csvs
+            csv_files = [mem_path]
+        else:  # multiple csvs
             files = os.listdir(mem_path)
             csv_files = [(int(file.split(".")[0].split("_")[-1]),file) for file in files if file.endswith("csv") and file.startswith(table_prefix)]
             csv_files.sort()
@@ -89,10 +89,10 @@ def run_rgr(mem_path = SIMULATION_FILE,verbose = False):
         del x, params_dict, params_list
 
 
-def run_single(mem_path = SIMULATION_FILE,verbose = False):
+def run_single(mem_path=SIMULATION_FILE, verbose=False):
     x = MainRun(mem_path)
     x.simulator()
-    x.pipeline.ipc
+    print(x.pipeline.ipc)
 
 
 
@@ -132,9 +132,9 @@ if __name__ == '__main__':
 
 
     if args_params["single"]:
-        run_single(args_params["dir"],args_params["verbose"])
+        run_single(args_params["dir"], args_params["verbose"])
     elif args_params["reg"]:
-        run_rgr(args_params["dir"],args_params["verbose"])
+        run_rgr(args_params["dir"], args_params["verbose"])
 
 
 
