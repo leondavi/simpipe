@@ -1,12 +1,13 @@
 
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
+DEAFULT_TABLE_PREFIX = "histtab_tid_"
 
 NUM_THREADS = 4
 NUM_STAGES = 4
-SPECULATIVE = False  # [True, False]
+SPECULATIVE = True  # [True, False]
 ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT"]
-VERB_ON = False
+VERB_ON = True
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size

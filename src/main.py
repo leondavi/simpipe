@@ -2,6 +2,7 @@
 import csv
 import os
 from idlelib import run
+import sys
 
 from Instruction import *
 from Pipeline import Pipeline
@@ -11,14 +12,21 @@ from RegressionPermutation import *
 
 class MainRun:
 
-    def __init__(self, params=dict()):
+    def __init__(self, mem_path = SIMULATION_FILE,params=dict()):
         self.memory = None
-        self.load_mem()
+        self.load_mem(mem_path)
         self.pipeline = Pipeline(self.memory[::-1], params)
         pass
 
-    def load_mem(self, memory_file=SIMULATION_FILE, remove_headers=True):
-        with open(memory_file) as f:
+    def load_mem(self, mem_path, table_prefix = DEAFULT_TABLE_PREFIX, remove_headers=True):
+        csv_tables = []
+        if mem_path.endswith("csv"):
+            csv_tables = [mem_path]
+        else: #multiple csvs
+            files = os.listdir(mem_path)
+            csv_files = [file for file in files if file.endswith("csv") and file.startswith(table_prefix)]
+
+        with open(mem_path) as f:
             reader = csv.reader(f)
             self.memory = list(reader)
         if remove_headers:
@@ -34,7 +42,7 @@ class MainRun:
         self.pipeline.report_statistics()
 
 
-def run_rgr():
+def run_rgr(mem_path = SIMULATION_FILE):
     # generate permutations
     num_thread_list = [1, 2, 4]
     issue_policy_list = ["RR", "COARSE", "EVENT"]
@@ -56,7 +64,7 @@ def run_rgr():
             params_dict[key] = val
             params_list.append(val)
 
-        x = MainRun(params_dict)
+        x = MainRun(mem_path,params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
         # x.pipeline.report_model()
@@ -64,13 +72,33 @@ def run_rgr():
         del x, params_dict, params_list
 
 
-def run_single():
-    x = MainRun()
+def run_single(mem_path = SIMULATION_FILE):
+    x = MainRun(mem_path)
     x.simulator()
     x.pipeline.ipc
 
 
-#run_single()
-run_rgr()
 
+def bool_arg_parsing(input_str):
+    return True if (input_str == "True" or input_str == "1") else False
+
+args_params = dict()
+if __name__ == '__main__':
+
+    args_params["single"] = False
+    args_params["reg"] = False
+    args_params["dir"] = SIMULATION_FILE
+
+    for arg in sys.argv[1:]:
+       if arg.startswith("dir="):
+           args_params["dir"] = arg.split("=")[1]
+       elif arg.startswith("single="):
+           args_params["single"] = bool_arg_parsing(arg.split("=")[1])
+       elif arg.startswith("reg="):
+           args_params["reg"] = bool_arg_parsing(arg.split("=")[1])
+
+    if args_params["single"]:
+        run_single(args_params["dir"])
+    elif args_params["reg"]:
+        run_rgr(args_params["dir"])
 
