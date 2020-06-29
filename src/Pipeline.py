@@ -4,27 +4,30 @@ from Fetch import *
 class Pipeline:
     # arg
     # fetch_size - Number of instruction that fetch brings from memory each time
-    def __init__(self, memory, num_threads=NUM_THREADS, num_stages=NUM_STAGES, fetch_size=DEFAULT_FETCH_SIZE,
-                 issue_policy=ISSUE_POLICY):
-        self.fetchUnits = [Fetch(tid, memory, fetch_size) for tid in range(0, num_threads)]  # Create fetch unit
-        self.stages = FIFOQueue(num_stages)
-        self.stages.set_q_list([Instruction.empty_inst(0)] * num_stages)
+    def __init__(self, memory, params=dict()):
+        self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
+        self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
+        self.fetchUnits = [Fetch(tid, memory, params) for tid in range(0, self.num_threads)]  # Create fetch unit
+        self.stages = FIFOQueue(self.num_stages)
+        self.stages.set_q_list([Instruction.empty_inst(0)] * self.num_stages)
         self.wb_inst = Instruction.empty_inst(0)
-        self.num_threads = num_threads
-        self.issue_policy = issue_policy
+        self.issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
         self.tid_issue_ptr = 0
         self.tid_prefetch_vld = False
         self.tid_prefetch_ptr = 0
-        self.dependency_status = [0 for _ in range(0, num_threads)]
-        self.fetch_policy_func = self.round_robin
+        self.dependency_status = [0 for _ in range(0, self.num_threads)]
+        self.speculative = params["SPECULATIVE"] == "True" if "SPECULATIVE" in params.keys() else SPECULATIVE
         self.timer = DEFAULT_TIMEOUT  # TODO Create timer in case no instruction are done for some latency
         # Statistics
         self.inst_committed = 0
+        self.ipc = 0
 
     def headers_str(self):  # TODO - update the pipe EX as the remain instruction,WB=last commit/dropped inst from queue
         return ["Time"]+["Next Fetch"] + ["Q"+str(n) for n in range(0, self.num_threads)] + ["IS", "DE", "EX", "WB"]
 
     def print_tick(self, cur_tick):
+        if not VERB_ON:
+            return
         q_sts = [str(self.fetchUnits[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         p_inst = [self.stages.q_list[i].str() for i in range(0, self.stages.size)]
         p_id = self.tid_prefetch_ptr if self.tid_prefetch_vld else "x"
@@ -97,7 +100,7 @@ class Pipeline:
 
     def update_dependency(self, cur_tick):
         inst = self.stages.back()
-        if inst.got_dependency() and (not SPECULATIVE):
+        if inst.got_dependency() and (not self.speculative):
             self.dependency_status[inst.tid] = cur_tick+self.stages.size
 
     def get_dependency(self, cur_tick):
@@ -110,7 +113,10 @@ class Pipeline:
             self.inst_committed += 1
 
     def report_statistics(self):
-        print("Inst Committed {0} ipc {1:.3f}".format(self.inst_committed, float(self.inst_committed/self.last_tick)))
+        self.ipc = float(self.inst_committed/self.last_tick)
+        if not VERB_ON:
+            return
+        print("Inst Committed {0} ipc {1:.3f}".format(self.inst_committed, self.ipc))
 
     def flush_pipe(self, tid, cur_num):
         for i in range(0, self.stages.size-1):
@@ -130,7 +136,6 @@ class Pipeline:
         if self.fetchUnits[self.tid_issue_ptr].fetchQueue.len() != 0:
             next_inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.front()
             if next_inst.got_dependency():
-                print("EVENT TEST")
                 self.tid_issue_ptr = (self.tid_issue_ptr-1) % self.num_threads
 
     def coarse_policy(self):
@@ -152,3 +157,8 @@ class Pipeline:
         stages_done = all([self.stages.q_list[i].empty_inst for i in range(0, self.stages.size)])
         timeout_done = self.timer == 0
         return (fetch_done and stages_done) or timeout_done
+
+    def report_model(self):
+        print("Num Thread={0}, Issue={1}, Speculative={2}, stage={3}, delay={4}".format(
+            self.num_threads, self.issue_policy, self.speculative, self.stages.size,
+            self.fetchUnits[0].prefetch_delay))

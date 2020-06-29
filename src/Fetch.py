@@ -5,18 +5,20 @@ from Definitions import *
 
 class Fetch:
 
-    def __init__(self, tid: int, memory, fetch_size, queue_size=DEFAULT_FETCH_QUEUE_SIZE,
-                 prefetch_delay=DEFAULT_PREFETCH_DELAY, init_mem_ptr=0):
+    def __init__(self, tid: int, memory, params, ):
         self.tid = tid
-        self.fetchQueue = FIFOQueue(queue_size)
-        self.NextInstMemPtr = init_mem_ptr
+        self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
+        self.fetchQueue = FIFOQueue(self.queue_size)
+        self.initMemPtr = 0
+        self.NextInstMemPtr = self.initMemPtr
         self.MaxPtr = len(memory)
-        self.initMemPtr = init_mem_ptr
         self.memory = memory
-        self.fetch_size = fetch_size  # Max number of instructions to fetch from memory
+        self.fetch_size = int(params["FETCH_SIZE"]) if "FETCH_SIZE" in params.keys() \
+            else FETCH_SIZE  # Max number of instructions to fetch from memory
         # PreFetch scheduling mechanism
         self.prefetch_ongoing = False
-        self.prefetch_delay = prefetch_delay
+        self.prefetch_delay = int(params["PREFETCH_DELAY"]) if "PREFETCH_DELAY" in params.keys() \
+            else PREFETCH_DELAY
         self.prefetch_cycle = 0
 
     def set_mem_ptr(self, ptr_val: int):
@@ -34,7 +36,7 @@ class Fetch:
         self.NextInstMemPtr += 1
 
         # Calculate based on the current offset where the instruction located in the line
-        max_fetch_size = self.fetch_size - ((int(first_inst.pc)/INSTRUCTION_SIZE) % self.fetch_size) - 1
+        max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
 
         former_inst = first_inst  # Used inside the loop to track last instruction
         empty_inst = False  # Once set, the rest instruction that pushed are empty
@@ -48,7 +50,7 @@ class Fetch:
                 curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid, self.NextInstMemPtr)
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
-                if delta_pc != INSTRUCTION_SIZE:
+                if delta_pc != DEFAULT_INSTRUCTION_SIZE:
                     empty_inst = True
                 else:
                     self.fetchQueue.push(curr_inst)

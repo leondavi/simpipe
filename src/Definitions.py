@@ -2,15 +2,16 @@
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 
-NUM_THREADS = 1
+NUM_THREADS = 4
 NUM_STAGES = 4
-SPECULATIVE = False
-ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT"]
+SPECULATIVE = False  # [True, False]
+ISSUE_POLICY = "COARSE"  # ["RR", "COARSE", "EVENT"]
+VERB_ON = False
 
-INSTRUCTION_SIZE = 4  # Instruction size in bytes
-DEFAULT_FETCH_SIZE = 4  # Default number of instructions
-DEFAULT_FETCH_QUEUE_SIZE = 8  # Instruction Queue(IQ) size
-DEFAULT_PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
+DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
+IQ_SIZE = 8  # Instruction Queue(IQ) size
+PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
+FETCH_SIZE = 4  # Default number of instructions
 
 DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will turn it off
 
