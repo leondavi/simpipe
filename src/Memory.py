@@ -8,11 +8,13 @@ class Memory:
     def __init__(self,mem_params:dict,tables_prefix = DEAFULT_TABLE_PREFIX):
         self.main_memory = []
         self.header = []
-        self.load_memory(mem_params,tables_prefix)
-        self.instruction_keys = self.set_instruction_keys(self.header)
+        self.load_memory(mem_params,tables_prefix) #loading memory from a file
+        self.instruction_keys = self.set_instruction_keys(self.header) # defines attributes of instructions that are loaded from file
 
 
-    def load_memory(self,mem_params:dict,tables_prefix):
+    def load_memory(self,mem_params:dict,tables_prefix) -> None:
+        if 'mem_path' not in mem_params:
+            return
         mem_path = mem_params['mem_path']
         max_ptr = mem_params['ptrMax']
         if mem_path.endswith("csv"):
