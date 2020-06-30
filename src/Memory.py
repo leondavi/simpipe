@@ -48,9 +48,6 @@ class Memory:
     def len(self):
         return len(self.main_memory)
 
-    def memory_file(self):
-        return self.main_memory
-
     def get_row(self,row_idx : int) -> list:
         if row_idx < len(self.main_memory):
             return self.main_memory[row_idx]
