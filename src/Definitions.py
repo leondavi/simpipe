@@ -8,7 +8,7 @@ NUM_THREADS = 1
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False]
 ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT"]
-VERB_ON = False
+VERB_ON = True
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size

@@ -1,17 +1,18 @@
 from FIFOQueue import FIFOQueue
 from Instruction import *
 from Definitions import *
+from Memory import Memory
 
 
 class Fetch:
 
-    def __init__(self, tid: int, memory, params, ):
+    def __init__(self, tid: int, memory : Memory, params, ):
         self.tid = tid
         self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
         self.fetchQueue = FIFOQueue(self.queue_size)
         self.initMemPtr = 0
         self.NextInstMemPtr = self.initMemPtr
-        self.MaxPtr = len(memory)
+        self.MaxPtr = memory.len()
         self.memory = memory
         self.fetch_size = int(params["FETCH_SIZE"]) if "FETCH_SIZE" in params.keys() \
             else FETCH_SIZE  # Max number of instructions to fetch from memory
@@ -31,7 +32,7 @@ class Fetch:
             return False
 
         # First instruction must be pushed and update the pointers
-        first_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid, self.NextInstMemPtr)
+        first_inst = Instruction.inst_from_row(self.memory,self.NextInstMemPtr, self.tid)
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
 
@@ -47,7 +48,7 @@ class Fetch:
             if not self.ptr_within_mem_range(self.NextInstMemPtr):
                 empty_inst = True
             else:
-                curr_inst = Instruction.inst_from_row(self.memory[self.NextInstMemPtr], self.tid, self.NextInstMemPtr)
+                curr_inst = Instruction.inst_from_row(self.memory,self.NextInstMemPtr, self.tid)
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != DEFAULT_INSTRUCTION_SIZE:
@@ -86,10 +87,10 @@ class Fetch:
         if self.initMemPtr > ptr_val:
             return False
         if self.MaxPtr:
-            if (ptr_val < len(self.memory)) and (ptr_val < self.MaxPtr):
+            if (ptr_val < self.memory.len()) and (ptr_val < self.MaxPtr):
                 return True
         else:  # Max Ptr isn't defined
-            if ptr_val < len(self.memory):
+            if ptr_val < self.memory.len():
                 return True
         return False
 

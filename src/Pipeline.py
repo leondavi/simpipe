@@ -1,10 +1,10 @@
 from Fetch import *
-
+from Memory import Memory
 
 class Pipeline:
     # arg
     # fetch_size - Number of instruction that fetch brings from memory each time
-    def __init__(self, memory, params=dict()):
+    def __init__(self, memory : Memory, params=dict()):
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
         self.fetchUnits = [Fetch(tid, memory, params) for tid in range(0, self.num_threads)]  # Create fetch unit

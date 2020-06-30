@@ -1,11 +1,11 @@
 from Definitions import *
+from Memory import Memory
 
 CSV_IDX_DICT = {"pc": 1,"m_inst":5, "inst_name": 7, "br_taken": 8}
 # CSV_IDX_DICT = {"tick_rec":0, "pc":1, "dpc":2, "pc_req_":3,dpc_req,m_inst,inst_grp,cname,br_taken
 
 
 class Instruction:
-    csv_keys = dict()
 
     def __init__(self, tid=0, pc="", inst_name="x", inst_num="x", empty_inst=True):
         self.pc = pc
@@ -94,15 +94,17 @@ class Instruction:
             self.rs2 = rs2
 
     @staticmethod
-    def inst_from_row(csv_row: list, tid, num):
+    def inst_from_row(memory : Memory, ptr : int, tid):
+        csv_row = memory.get_row(ptr)
+        csv_keys = memory.get_instruction_keys()
         new_inst = Instruction()
         new_inst.empty_inst = False
         new_inst.tid = tid
-        new_inst.num = num
-        new_inst.pc = csv_row[Instruction.csv_keys["pc"]]
-        new_inst.inst_name = csv_row[Instruction.csv_keys["cname"]]
-        new_inst.br_taken = int(csv_row[Instruction.csv_keys["br_taken"]])
-        new_inst.m_inst = "{0:032b}".format(int(csv_row[Instruction.csv_keys["m_inst"]]))[::-1]
+        new_inst.num = ptr
+        new_inst.pc = csv_row[csv_keys["pc"]]
+        new_inst.inst_name = csv_row[csv_keys["cname"]]
+        new_inst.br_taken = int(csv_row[csv_keys["br_taken"]])
+        new_inst.m_inst = "{0:032b}".format(int(csv_row[csv_keys["m_inst"]]))[::-1]
         # The trace not indicate on taken branches
         if (new_inst.inst_name == "jal") or (new_inst.inst_name == "jalr"):
             new_inst.br_taken = 1
