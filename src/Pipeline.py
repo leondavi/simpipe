@@ -17,8 +17,9 @@ class Pipeline:
         self.tid_prefetch_ptr = 0
         self.dependency_status = [0 for _ in range(0, self.num_threads)]
         self.speculative = params["SPECULATIVE"] == "True" if "SPECULATIVE" in params.keys() else SPECULATIVE
-        self.timer = DEFAULT_TIMEOUT  # TODO Create timer in case no instruction are done for some latency
+        self.timer = DEFAULT_TIMEOUT
         # Statistics
+        self.last_tick = 0
         self.inst_committed = 0
         self.ipc = 0
 
@@ -58,8 +59,6 @@ class Pipeline:
         # Progress Fetch
         for idx in range(0, self.num_threads):
             self.fetchUnits[idx].tick(cur_tick)
-
-        self.timer -= 1
 
         self.print_tick(cur_tick)
         return True
@@ -111,11 +110,14 @@ class Pipeline:
         self.last_tick = cur_tick
         if not self.wb_inst.empty_inst:
             self.inst_committed += 1
+            self.timer = DEFAULT_TIMEOUT
+        else:
+            self.timer -= 1
+
+        if self.last_tick:  # Avoid division by zero
+            self.ipc = float(self.inst_committed / self.last_tick)
 
     def report_statistics(self):
-        self.ipc = float(self.inst_committed/self.last_tick)
-        if not VERB_ON:
-            return
         print("Inst Committed {0} ipc {1:.3f}".format(self.inst_committed, self.ipc))
 
     def flush_pipe(self, tid, cur_num):

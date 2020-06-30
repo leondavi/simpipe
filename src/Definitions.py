@@ -19,6 +19,22 @@ DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will 
 
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
+# generate permutations
+num_thread_list = [1, 2, 4]
+issue_policy_list = ["RR", "COARSE", "EVENT"]
+speculative_list = [False, True]
+num_stages_list = [4]
+prefetch_delay_list = [3]
+
+RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
+       ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
+       ["PREFETCH_DELAY", prefetch_delay_list]]
+
+FAST_RGR = [["NUM_THREAD", [2]], ["ISSUE_POLICY", ["RR"]], ["SPECULATIVE", [False]],
+            ["NUM_STAGES", [4]], ["PREFETCH_DELAY", [3]]]
+
+#RGR = FAST_RGR
+
 OPCODE = {
     "0110111": "LUI",
     "0010111": "AUIPC",
@@ -29,7 +45,8 @@ OPCODE = {
     "0100011": "STORE",
     "0010011": "ALUI",
     "0110011": "ALU",
-    "0011011": "ALUW",
+    "0011011": "ALUWI",
+    "0111011": "ALUW",
     "0001111": "FENCE",
     "1110011": "ECMD"
 }

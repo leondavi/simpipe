@@ -71,8 +71,10 @@ class Instruction:
                 self.name = ADD_SUB[int(self.m_inst[30])]
             elif self.name == "SR":
                 self.name = SR[int(self.m_inst[30])]
-        elif self.inst_name == "ALUW":
+        elif self.inst_name == "ALUWI":
             assert 0 # TODO - not suportted yet
+        elif self.inst_name == "ALUW":
+            assert 0  # TODO - not suportted yet
         else:
             self.name = self.inst_opcode
         self.decode_operands()
