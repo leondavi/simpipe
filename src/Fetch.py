@@ -21,6 +21,9 @@ class Fetch:
         self.prefetch_delay = int(params["PREFETCH_DELAY"]) if "PREFETCH_DELAY" in params.keys() \
             else PREFETCH_DELAY
         self.prefetch_cycle = 0
+        # Statistics
+        self.prefetch_inst_count = 0
+        self.dummy_inst_count = 0
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -32,9 +35,10 @@ class Fetch:
             return False
 
         # First instruction must be pushed and update the pointers
-        first_inst = Instruction.inst_from_row(self.memory,self.NextInstMemPtr, self.tid)
+        first_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
+        self.prefetch_inst_count += 1
 
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
@@ -48,7 +52,7 @@ class Fetch:
             if not self.ptr_within_mem_range(self.NextInstMemPtr):
                 empty_inst = True
             else:
-                curr_inst = Instruction.inst_from_row(self.memory,self.NextInstMemPtr, self.tid)
+                curr_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != DEFAULT_INSTRUCTION_SIZE:
@@ -56,11 +60,13 @@ class Fetch:
                 else:
                     self.fetchQueue.push(curr_inst)
                     self.NextInstMemPtr += 1
+                    self.prefetch_inst_count += 1
                     former_inst = curr_inst
 
             # None were pushed, create an empty instruction
             if empty_inst:
                 self.fetchQueue.push(Instruction.empty_inst(self.tid, "dummy", False))
+                self.dummy_inst_count += 1
 
         return True
 
@@ -104,3 +110,8 @@ class Fetch:
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
         self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?
+
+    def report_statistics(self):
+        print("Fetch TID={0} inst_count={1} dummy_count={2} mem_len={3} mem_delay={4} next_ptr={5}".format(
+            self.tid, self.prefetch_inst_count, self.dummy_inst_count, self.memory.len(), self.prefetch_delay,
+            self.NextInstMemPtr))

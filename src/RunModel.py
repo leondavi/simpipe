@@ -1,8 +1,6 @@
-import os
-import csv
-from Instruction import *
 from Pipeline import Pipeline
 from Memory import Memory
+
 
 # This class creates and run the Pipeline model
 # Receive two parameters dictionary memory and pipeline
@@ -20,4 +18,5 @@ class RunModel:
             cur_tick += 1
 
     def report_statistics(self):
+        self.pipeline.report_model()
         self.pipeline.report_statistics()

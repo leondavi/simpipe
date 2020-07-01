@@ -32,9 +32,9 @@ class Pipeline:
         q_sts = [str(self.fetchUnits[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         p_inst = [self.stages.q_list[i].str() for i in range(0, self.stages.size)]
         p_id = self.tid_prefetch_ptr if self.tid_prefetch_vld else "x"
-        print("{0:<5},{1:^5},{2:^8},{3:^30},{4} {5} {6}".format(
+        print("{0:<5},{1:^5},{2:^8},{3:^50},{4} {5} {6} {7}".format(
             cur_tick, p_id, ",".join(q_sts), ",".join(p_inst), self.wb_inst.full_str(), self.wb_inst.num ,
-            self.wb_inst.pc))
+            self.wb_inst.pc, self.inst_committed))
 
     def tick(self, cur_tick):
         # Checking if all threads finished there fetching
@@ -94,7 +94,7 @@ class Pipeline:
 
     def set_commit(self):
         inst = self.stages.front()
-        if inst.br_taken == 1:
+        if inst.empty_inst == 0 and inst.br_taken == 1:
             self.flush_pipe(inst.tid, inst.num)
 
     def update_dependency(self, cur_tick):
@@ -161,6 +161,8 @@ class Pipeline:
         return (fetch_done and stages_done) or timeout_done
 
     def report_model(self):
-        print("Num Thread={0}, Issue={1}, Speculative={2}, stage={3}, delay={4}".format(
-            self.num_threads, self.issue_policy, self.speculative, self.stages.size,
-            self.fetchUnits[0].prefetch_delay))
+        for tid_idx in range(0, self.num_threads):
+            self.fetchUnits[tid_idx].report_statistics()
+
+        print("Num Thread={0}, Issue={1}, Speculative={2}, stage={3}".format(
+            self.num_threads, self.issue_policy, self.speculative, self.stages.size))
