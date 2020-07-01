@@ -2,7 +2,7 @@ import csv
 import pathlib
 import sys
 
-# from Definitions import *
+from Definitions import *
 
 from RegressionPermutation import *
 from RunModel import *
@@ -46,7 +46,7 @@ def run_single():
 
     x = RunModel(mem_params)
     x.simulator()
-    print(x.pipeline.ipc)
+    x.report_statistics()
 
 
 def mem_params_from_args():
