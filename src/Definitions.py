@@ -3,14 +3,14 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = True
+DEFAULT_EN_ANOMALY = False
 
 NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False]
 ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR_ANOMALY" # ["RR","RR_ANOMALY"]
-VERB_ON = True
+VERB_ON = False
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
@@ -22,11 +22,11 @@ DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will 
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
-num_thread_list = [1, 2, 4]
-issue_policy_list = ["RR", "COARSE", "EVENT"]
+num_thread_list = [1, 2, 4, 8, 16]
+issue_policy_list = ["RR_ANOMALY_PERSISTENT"] #["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4]
-prefetch_delay_list = [3]
+prefetch_delay_list = [2,4,6,8,10]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],

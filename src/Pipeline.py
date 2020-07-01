@@ -166,8 +166,6 @@ class Pipeline:
         for tid in range(0,self.num_threads):
             valid = self.fetchUnits[tid].fetchQueue and\
                     self.fetchUnits[tid].anomaly_flag
-            if self.fetchUnits[tid].anomaly_flag:
-                print("tid: "+str(tid)+" "+str(self.fetchUnits[tid].anomaly_flag))
             if valid:
                 self.tid_issue_ptr = tid-1 % self.num_threads
                 return

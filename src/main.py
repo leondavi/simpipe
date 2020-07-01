@@ -6,15 +6,17 @@ from Definitions import *
 
 from RegressionPermutation import *
 from RunModel import *
-
+from datetime import datetime
 
 def run_rgr():
+    now = datetime.now()
+    res_filename = "results_"+now.strftime("%m-%d-%Y-%H_%M_%S")+".csv"
     mem_params = mem_params_from_args()
     if os.path.isfile(mem_params["mem_path"]):
         mem_path = pathlib.Path(mem_params['mem_path'])
-        file_path = mem_path.parents[0] / "results.csv"
+        file_path = mem_path.parents[0] / res_filename
     else:
-        file_path = mem_params['mem_path'] + "\\results.csv"
+        file_path =  pathlib.Path(mem_params['mem_path']) / res_filename
 
     print(file_path)
 
@@ -108,7 +110,7 @@ if __name__ == '__main__':
         elif arg.startswith("ptrMax="):
             args_params["ptrMax"] = int(arg.split("=")[1])
         elif arg.startswith("en_anomaly="):
-            args_params["en_anomaly"] = int(arg.split("=")[1])
+            args_params["en_anomaly"] = bool_arg_parsing(arg.split("=")[1])
 
     if args_params["single"]:
         run_single()
