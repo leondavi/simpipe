@@ -6,7 +6,7 @@ from Memory import Memory
 
 class Fetch:
 
-    def __init__(self, tid: int, memory : Memory, params, ):
+    def __init__(self, tid: int, memory : Memory, params):
         self.tid = tid
         self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
         self.fetchQueue = FIFOQueue(self.queue_size)

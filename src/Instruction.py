@@ -105,11 +105,14 @@ class Instruction:
         new_inst.inst_name = csv_row[csv_keys["cname"]]
         new_inst.br_taken = int(csv_row[csv_keys["br_taken"]])
         new_inst.m_inst = "{0:032b}".format(int(csv_row[csv_keys["m_inst"]]))[::-1]
+        new_inst.anomaly = int(csv_row[csv_keys['anomaly']] if 'anomaly' in csv_keys else False)
         # The trace not indicate on taken branches
         if (new_inst.inst_name == "jal") or (new_inst.inst_name == "jalr"):
             new_inst.br_taken = 1
         new_inst.decode_inst()
         return new_inst
+
+
 
     @staticmethod
     def empty_inst(tid, name="bubble", empty_inst=True):
