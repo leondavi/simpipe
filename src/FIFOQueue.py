@@ -23,6 +23,11 @@ class FIFOQueue:
             return self.q_list[0]
         return None
 
+    def at(self,idx):
+        if idx < len(self.q_list):
+            return self.q_list[idx]
+        return None
+
     def len(self):
         return len(self.q_list)
 
@@ -39,3 +44,6 @@ class FIFOQueue:
 
     def flush(self):
         self.q_list = []
+
+    def __bool__(self):
+        return len(self.q_list) > 0

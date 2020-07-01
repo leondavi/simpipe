@@ -31,6 +31,7 @@ def run_rgr():
             params_dict[key] = val
             params_list.append(val)
         print(params_list)
+        params_dict = update_pipeline_params(params_dict) #update with attributes from user input
         x = RunModel(mem_params, params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
@@ -40,11 +41,15 @@ def run_rgr():
 
     csv_file.close()
 
+def update_pipeline_params(params_dict : dict):
+    params_dict['en_anomaly'] = args_params["en_anomaly"]
+    return params_dict
 
 def run_single():
     mem_params = mem_params_from_args()
-
-    x = RunModel(mem_params)
+    params_dict = dict()
+    params_dict = update_pipeline_params(params_dict)  # update with attributes from user input
+    x = RunModel(mem_params,params_dict)
     x.simulator()
     x.report_statistics()
 
@@ -72,6 +77,7 @@ def print_help():
     print("single         True/False             Running simple simulation of single run of default parameters")
     print("reg            True/False             Running regression simulation from configuration file of parameters")
     print("verbose        True/False             Pipeline verbosity")
+    print("en_anomaly     True/False             Anomaly column - Enabled")
 
 
 args_params = dict()
@@ -84,6 +90,7 @@ if __name__ == '__main__':
     args_params["csv_output"] = False
     args_params["dir"] = SIMULATION_FILE
     args_params["ptrMax"] = None
+    args_params["en_anomaly"] = DEFAULT_EN_ANOMALY
 
     for arg in sys.argv[1:]:
         if arg.startswith("dir="):
@@ -100,6 +107,8 @@ if __name__ == '__main__':
             args_params["csv_output"] = bool_arg_parsing(arg.split("=")[1])
         elif arg.startswith("ptrMax="):
             args_params["ptrMax"] = int(arg.split("=")[1])
+        elif arg.startswith("en_anomaly="):
+            args_params["en_anomaly"] = int(arg.split("=")[1])
 
     if args_params["single"]:
         run_single()

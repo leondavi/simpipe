@@ -12,6 +12,7 @@ class Pipeline:
         self.stages.set_q_list([Instruction.empty_inst(0)] * self.num_stages)
         self.wb_inst = Instruction.empty_inst(0)
         self.issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
+        self.prefetch_policy = params["PREFETCH_POLICY"] if "PREFETCH_POLICY" in params.keys() else PREFETCH_POLICY
         self.tid_issue_ptr = 0
         self.tid_prefetch_vld = False
         self.tid_prefetch_ptr = 0
@@ -67,6 +68,8 @@ class Pipeline:
     def set_prefetch(self, cur_tick):
         self.tid_prefetch_vld = False
         req_list = [self.fetchUnits[i].check_prefetch() for i in range(self.num_threads)]
+        # update based on the policy of prefetch - changes tid_prefetch_ptr if it is needed
+        self.update_prefetch_policy()
         self.tid_prefetch_ptr = self.round_robin(self.tid_prefetch_ptr, req_list, self.num_threads)
         if req_list[self.tid_prefetch_ptr]:
             self.fetchUnits[self.tid_prefetch_ptr].set_prefetch(cur_tick)
@@ -131,8 +134,47 @@ class Pipeline:
             self.event_policy()
         elif self.issue_policy == "COARSE":
             self.coarse_policy()
+        elif self.issue_policy == "RR_ANOMALY_PERSISTENT":
+            self.round_robin_anomaly_persistent_policy()
         elif self.issue_policy == "RR":
             pass
+
+    def update_prefetch_policy(self):
+        if self.prefetch_policy == "RR_ANOMALY":
+            self.round_robin_anomaly_policy()
+        elif self.prefetch_policy == "RR":
+            pass
+
+    def round_robin_anomaly_policy(self):
+        ''':arg
+         finds an empty fetch queue that is not in an anomaly state
+         and set it to next fetch if no anomaly
+        '''
+        for tid in range(0,self.num_threads):
+            valid = not self.fetchUnits[tid].fetchQueue and\
+            not self.fetchUnits[tid].fetch_done and\
+            not self.fetchUnits[tid].anomaly_flag
+            if valid:
+                self.tid_prefetch_ptr = tid-1 % self.num_threads
+
+    def round_robin_anomaly_persistent_policy(self):
+
+        if self.fetchUnits[self.tid_issue_ptr].fetchQueue:
+            self.tid_issue_ptr -= 1
+            return
+
+        for tid in range(0,self.num_threads):
+            valid = self.fetchUnits[tid].fetchQueue and\
+                    self.fetchUnits[tid].anomaly_flag
+            if self.fetchUnits[tid].anomaly_flag:
+                print("tid: "+str(tid)+" "+str(self.fetchUnits[tid].anomaly_flag))
+            if valid:
+                self.tid_issue_ptr = tid-1 % self.num_threads
+                return
+
+
+
+
 
     def event_policy(self):
         if self.fetchUnits[self.tid_issue_ptr].fetchQueue.len() != 0:

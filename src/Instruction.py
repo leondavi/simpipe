@@ -93,6 +93,15 @@ class Instruction:
             self.rs2_vld = True
             self.rs2 = rs2
 
+    def __bool__(self):
+        return not self.empty_inst
+
+    def __eq__(self,other):
+        return (self.pc == other.pc) and (self.tid == other.tid) and (self.m_inst == other.m_inst)
+
+    def __ne__(self,other):
+        return not self == other
+
     @staticmethod
     def inst_from_row(memory : Memory, ptr : int, tid):
         csv_row = memory.get_row(ptr)
