@@ -81,6 +81,10 @@ def print_help():
     print("verbose        True/False             Pipeline verbosity")
     print("en_anomaly     True/False             Anomaly column - Enabled")
 
+def print_params():
+    for key,val in args_params.items():
+        print(key+"="+str(val),end=' ')
+    print()
 
 args_params = dict()
 
@@ -112,10 +116,13 @@ if __name__ == '__main__':
         elif arg.startswith("en_anomaly="):
             args_params["en_anomaly"] = bool_arg_parsing(arg.split("=")[1])
 
+    print_params()
+
     if args_params["single"]:
         run_single()
     elif args_params["reg"]:
         run_rgr()
+
 
 
 

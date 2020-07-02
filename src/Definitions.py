@@ -23,7 +23,7 @@ MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
 num_thread_list = [1, 2, 4, 8, 16]
-issue_policy_list = ["RR_ANOMALY_PERSISTENT"] #["RR", "COARSE", "EVENT"]
+issue_policy_list = ["RR","RR_ANOMALY_PERSISTENT"] #["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4]
 prefetch_delay_list = [2,4,6,8,10]
