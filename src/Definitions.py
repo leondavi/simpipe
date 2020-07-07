@@ -3,14 +3,14 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = False
+DEFAULT_EN_ANOMALY = True
 
 NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False]
 ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR_ANOMALY" # ["RR","RR_ANOMALY"]
-VERB_ON = False
+VERB_ON = True
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size

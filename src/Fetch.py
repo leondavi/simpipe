@@ -90,6 +90,7 @@ class Fetch:
             return False
         # anomaly case
         if self.anomaly_logic():
+            print("tid"+str(self.tid)+" Anomaly")
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -127,22 +128,17 @@ class Fetch:
         if not self.anomaly_enabled:
             return False
 
-        if not self.anomaly_flag: #check if there is anomaly
-            self.set_anomaly(self.anomaly_check())
-        if not self.fetchQueue: #if queue is empty
-            self.set_anomaly(False)
-        if self.anomaly_flag: #forbiden thread from fetching when there is an anomaly
-            return True
-        return False
+        self.set_anomaly(self.anomaly_check())
+        return self.anomaly_flag
 
     def set_anomaly(self,val = True):
         self.anomaly_flag = val
 
-
+    #whil anomaly appears in queue then there is anomaly
     def anomaly_check(self):
         found_inst = Instruction()
         for i in range(0,int(self.fetchQueue.len()/2)):
-            if self.fetchQueue.at(i).anomaly and (self.fetchQueue.at(i) != self.last_anomaly_inst):
+            if self.fetchQueue.at(i).anomaly:
                 found_inst = self.fetchQueue.at(i)
                 self.last_anomaly_inst = found_inst
                 return True

@@ -159,8 +159,8 @@ class Pipeline:
 
     def round_robin_anomaly_persistent_policy(self):
 
-        if self.fetchUnits[self.tid_issue_ptr].fetchQueue:
-            self.tid_issue_ptr -= 1
+        if self.fetchUnits[self.tid_issue_ptr].anomaly_flag and self.fetchUnits[self.tid_issue_ptr].fetchQueue:
+            self.tid_issue_ptr -= 1 # RR performs +1 so we force it to be persistent
             return
 
         for tid in range(0,self.num_threads):
