@@ -21,10 +21,13 @@ class Fetch:
         self.prefetch_delay = int(params["PREFETCH_DELAY"]) if "PREFETCH_DELAY" in params.keys() \
             else PREFETCH_DELAY
         self.prefetch_cycle = 0
+        self.issue_selected = False
         # Statistics
         self.prefetch_inst_count = 0
         self.dummy_inst_count = 0
+        # Anomaly
         self.anomaly_enabled = params['en_anomaly']
+        self.anoamly_count =  0
         self.anomaly_flag = False
 
     def set_mem_ptr(self, ptr_val: int):
@@ -41,6 +44,7 @@ class Fetch:
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
         self.prefetch_inst_count += 1
+        self.anoamly_count += first_inst.anomaly
 
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
@@ -63,6 +67,7 @@ class Fetch:
                     self.fetchQueue.push(curr_inst)
                     self.NextInstMemPtr += 1
                     self.prefetch_inst_count += 1
+                    self.anoamly_count += first_inst.anomaly
                     former_inst = curr_inst
 
             # None were pushed, create an empty instruction
@@ -76,7 +81,13 @@ class Fetch:
     def tick(self, cur_tick):
         if self.prefetch_ongoing and (self.prefetch_cycle + self.prefetch_delay <= cur_tick):
             self.fetch()
+            if self.anomaly_enabled:
+                self.anomaly_flag = self.anoamly_count > 0
             self.prefetch_ongoing = False
+
+        if self.anomaly_enabled and self.anoamly_count > 0 and not self.issue_selected:
+            self.anomaly_flag = True
+        self.issue_selected = False
 
     # Change fetch status
     def set_prefetch(self, cur_tick):
@@ -89,8 +100,7 @@ class Fetch:
         if self.prefetch_ongoing or self.mem_done():
             return False
         # anomaly case
-        if self.anomaly_logic():
-            print("tid"+str(self.tid)+" Anomaly")
+        if self.anomaly_enabled and self.anomaly_flag:
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -115,6 +125,7 @@ class Fetch:
     def flush_fetch(self, next_num):
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
+        self.anoamly_count = 0
         self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?
 
     def report_statistics(self):
@@ -122,25 +133,10 @@ class Fetch:
             self.tid, self.prefetch_inst_count, self.dummy_inst_count, self.memory.len(), self.prefetch_delay,
             self.NextInstMemPtr))
 
-    #anomaly functions
-
-    def anomaly_logic(self):
-        if not self.anomaly_enabled:
-            return False
-
-        self.set_anomaly(self.anomaly_check())
-        return self.anomaly_flag
-
-    def set_anomaly(self,val = True):
-        self.anomaly_flag = val
-
-    #whil anomaly appears in queue then there is anomaly
-    def anomaly_check(self):
-        found_inst = Instruction()
-        for i in range(0,int(self.fetchQueue.len()/2)):
-            if self.fetchQueue.at(i).anomaly:
-                found_inst = self.fetchQueue.at(i)
-                self.last_anomaly_inst = found_inst
-                return True
-        self.last_anomaly_inst = found_inst
-        return False
+    def get_issue_inst(self):
+        inst = self.fetchQueue.pop()
+        self.issue_selected = True
+        if self.anomaly_enabled and inst.anomaly:
+            self.anoamly_count = max(0,self.anoamly_count-1)
+            self.anomaly_flag = False
+        return inst

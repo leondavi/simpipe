@@ -30,7 +30,8 @@ class Pipeline:
     def print_tick(self, cur_tick):
         if not VERB_ON:
             return
-        q_sts = [str(self.fetchUnits[i].fetchQueue.len()) for i in range(0, self.num_threads)]
+        q_sts = ["{0}.{1}".format(self.fetchUnits[i].fetchQueue.len(),self.fetchUnits[i].anoamly_count) \
+                 for i in range(0, self.num_threads)]
         p_inst = [self.stages.q_list[i].str() for i in range(0, self.stages.size)]
         p_id = self.tid_prefetch_ptr if self.tid_prefetch_vld else "x"
         print("{0:<5},{1:^5},{2:^8},{3:^50},{4} {5} {6} {7}".format(
@@ -41,15 +42,14 @@ class Pipeline:
         # Checking if all threads finished there fetching
         if self.check_done():
             return False
-
-        # Select with thread will prefetch
-        self.set_prefetch(cur_tick)
+        # commit the instruction
+        self.set_commit()
 
         # Select with thread will issue
         self.set_issue(cur_tick)
 
-        # commit the instruction
-        self.set_commit()
+        # Select with thread will prefetch
+        self.set_prefetch(cur_tick)
 
         # Update dependency
         self.update_dependency(cur_tick)
@@ -60,6 +60,9 @@ class Pipeline:
         # Progress Fetch
         for idx in range(0, self.num_threads):
             self.fetchUnits[idx].tick(cur_tick)
+
+        if cur_tick == 35:
+            pause = 1
 
         self.print_tick(cur_tick)
         return True
@@ -90,7 +93,7 @@ class Pipeline:
         self.wb_inst = self.stages.front()
 
         if req_list[self.tid_issue_ptr]:
-            inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.pop()
+            inst = self.fetchUnits[self.tid_issue_ptr].get_issue_inst()
             self.stages.push(inst)
         else:  # Push empty inst
             self.stages.push(Instruction.empty_inst(0))
@@ -102,7 +105,8 @@ class Pipeline:
 
     def update_dependency(self, cur_tick):
         inst = self.stages.back()
-        if inst.got_dependency() and (not self.speculative):
+        if inst.got_dependency() and (not self.speculative): # speculative issue instructions that have dependency
+            # set in which cycle the instruction in thread is ready to be issued
             self.dependency_status[inst.tid] = cur_tick+self.stages.size
 
     def get_dependency(self, cur_tick):
@@ -150,6 +154,9 @@ class Pipeline:
          finds an empty fetch queue that is not in an anomaly state
          and set it to next fetch if no anomaly
         '''
+        if not self.fetchUnits[self.tid_issue_ptr].anomaly_enabled:
+            return # if anomaly is disabled then RR
+
         for tid in range(0,self.num_threads):
             valid = not self.fetchUnits[tid].fetchQueue and\
             not self.fetchUnits[tid].fetch_done and\
@@ -158,9 +165,11 @@ class Pipeline:
                 self.tid_prefetch_ptr = tid-1 % self.num_threads
 
     def round_robin_anomaly_persistent_policy(self):
+        if not self.fetchUnits[self.tid_issue_ptr].anomaly_enabled:
+            return # if anomaly is disabled then RR
 
         if self.fetchUnits[self.tid_issue_ptr].anomaly_flag and self.fetchUnits[self.tid_issue_ptr].fetchQueue:
-            self.tid_issue_ptr -= 1 # RR performs +1 so we force it to be persistent
+            self.tid_issue_ptr = (self.tid_issue_ptr-1) % self.num_threads# RR performs +1 so we force it to be persistent
             return
 
         for tid in range(0,self.num_threads):
@@ -169,10 +178,6 @@ class Pipeline:
             if valid:
                 self.tid_issue_ptr = tid-1 % self.num_threads
                 return
-
-
-
-
 
     def event_policy(self):
         if self.fetchUnits[self.tid_issue_ptr].fetchQueue.len() != 0:
