@@ -23,6 +23,7 @@ class Fetch:
         self.prefetch_cycle = 0
         # Statistics
         self.prefetch_inst_count = 0
+        self.flushed_inst_count = 0
         self.dummy_inst_count = 0
         self.anomaly_enabled = params['en_anomaly']
         self.anomaly_flag = False
@@ -32,6 +33,9 @@ class Fetch:
 
     def fetch(self):
 
+         #TODO
+
+        print("inst ptr: "+str(self.NextInstMemPtr))
         # Check that the address is valid.
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
             return False
@@ -70,6 +74,7 @@ class Fetch:
                 self.fetchQueue.push(Instruction.empty_inst(self.tid, "dummy", False))
                 self.dummy_inst_count += 1
 
+        print("inst count "+str(self.prefetch_inst_count))
         return True
 
     # Progress pre-fetching, checks if got pending fetch request, and the fetch delay is passed.
@@ -113,13 +118,14 @@ class Fetch:
         return self.mem_done() and (not self.prefetch_ongoing) and (self.fetchQueue.len() == 0)
 
     def flush_fetch(self, next_num):
+        self.flushed_inst_count += self.fetchQueue.len()
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
         self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?
 
     def report_statistics(self):
-        print("Fetch TID={0} inst_count={1} dummy_count={2} mem_len={3} mem_delay={4} next_ptr={5}".format(
-            self.tid, self.prefetch_inst_count, self.dummy_inst_count, self.memory.len(), self.prefetch_delay,
+        print("Fetch TID={0} prefetched_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} mem_delay={5} next_ptr={6}".format(
+            self.tid, self.prefetch_inst_count, self.dummy_inst_count,self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
             self.NextInstMemPtr))
 
     #anomaly functions

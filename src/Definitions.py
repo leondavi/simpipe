@@ -3,9 +3,9 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = True
+DEFAULT_EN_ANOMALY = False
 
-NUM_THREADS = 4
+NUM_THREADS = 1
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False]
 ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
@@ -14,7 +14,7 @@ VERB_ON = True
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
-PREFETCH_DELAY = 8  # The delay from the cycle it granted to received
+PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
 DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will turn it off
