@@ -28,24 +28,21 @@ class Pipeline:
         self.count_inst_committed = 0
         self.inst_flushed = 0
         self.ipc = 0
+        self.pipeline_flushed_inst_count = 0
+        self.flushed_inst_count = 0
 
     # The main function that happens every cycle and responsible on the progress of the pipeline.
-    # Check if all thread are done
-    # Checking which instruction is committed and how it influences the pipeline
-    # Select an issue thread
-    # update prefetch
-    # Tick the sub-blocks (prefetch)
-    # Update statistic and print the current status of the pipeline (Optional)
+    # - Check if all thread are done
+    # - Checking which instruction is committed and how it influences the pipeline
+    # - Update dependency
+    # - Select an issue thread
+    # - update prefetch
+    # - Tick the sub-blocks (prefetch)
+    # - Update statistic and print the current status of the pipeline (Optional)
     def tick(self, cur_tick):
         # Checking if all threads finished there execution
         if self.check_done():
             return False
-
-        # Select with thread will prefetch
-        self.set_prefetch(cur_tick)
-
-        # Select with thread will issue
-        self.set_issue(cur_tick)
 
         # commit the instruction
         self.set_commit()
@@ -53,12 +50,18 @@ class Pipeline:
         # Update dependency
         self.update_dependency(cur_tick)
 
-        # Update simulation statistics
-        self.update_statistics(cur_tick)
+        # Select with thread will issue
+        self.set_issue(cur_tick)
+
+        # Select with thread will prefetch
+        self.set_prefetch(cur_tick)
 
         # Progress Fetch
         for idx in range(0, self.num_threads):
             self.fetchUnits[idx].tick(cur_tick)
+
+        # Update simulation statistics
+        self.update_statistics(cur_tick)
 
         self.print_tick(cur_tick)
         return True
@@ -121,28 +124,14 @@ class Pipeline:
     def get_dependency(self, cur_tick):
         return [self.dependency_status[i] <= cur_tick for i in range(0, self.num_threads)]
 
-    def update_statistics(self, cur_tick):
-        # count how many valid instruction committed
-        self.last_tick = cur_tick
-        if not self.wb_inst.empty_inst:
-            self.count_inst_committed += 1
-            self.timer = DEFAULT_TIMEOUT
-        else:
-            self.timer -= 1
-
-        if self.last_tick:  # Avoid division by zero
-            self.ipc = float(self.count_inst_committed / self.last_tick)
-
-    def report_statistics(self):
-        msg = "Inst Committed {0} ipc {1:.3f}".format(self.count_inst_committed, self.ipc)
-        pprint(msg, "NONE")
-
     def flush_pipe(self, tid, cur_num):
         for i in range(0, self.stages.size-1):
-            if self.stages.q_list[i].tid == tid:
+            if self.stages.q_list[i].empty_inst == False and self.stages.q_list[i].tid == tid:
+                self.pipeline_flushed_inst_count +=1
                 self.stages.q_list[i].empty_inst = True
         self.fetchUnits[tid].flush_fetch(cur_num+1)
 
+    #--------------- Policies ---------------#
     def update_issue_policy(self):
         if self.issue_policy == "EVENT":
             self.event_policy()
@@ -184,10 +173,6 @@ class Pipeline:
                 self.tid_issue_ptr = tid-1 % self.num_threads
                 return
 
-
-
-
-
     def event_policy(self):
         if self.fetchUnits[self.tid_issue_ptr].fetchQueue.len() != 0:
             next_inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.front()
@@ -197,7 +182,6 @@ class Pipeline:
     def coarse_policy(self):
         self.tid_issue_ptr = (self.tid_issue_ptr - 1) % self.num_threads
 
-    # policies
     @staticmethod
     def round_robin(ptr, req, size):
         for i in range(0, size):
@@ -214,9 +198,29 @@ class Pipeline:
         timeout_done = self.timer == 0
         return (fetch_done and stages_done) or timeout_done
 
+    #---------------  Statistics ---------------#
+
+    def update_statistics(self, cur_tick):
+        # count how many valid instruction committed
+        self.last_tick = cur_tick
+        if not self.wb_inst.empty_inst:
+            self.count_inst_committed += 1
+            self.timer = DEFAULT_TIMEOUT
+        else:
+            self.timer -= 1
+
+        if self.last_tick:  # Avoid division by zero
+            self.ipc = float(self.count_inst_committed / self.last_tick)
+        self.flushed_inst_count = self.pipeline_flushed_inst_count + \
+            sum([self.fetchUnits[idx].flushed_inst_count for idx in range(0, self.num_threads)])
+
     def report_model(self):
         for tid_idx in range(0, self.num_threads):
             self.fetchUnits[tid_idx].report_statistics()
-
         print("Num Thread={0}, Issue={1}, Speculative={2}, stage={3}".format(
             self.num_threads, self.issue_policy, self.speculative, self.stages.size))
+
+    def report_statistics(self):
+        msg = "Inst Committed {0} ipc {1:.3f} flushed {2}".format(self.count_inst_committed, self.ipc,
+                                                                  self.flushed_inst_count)
+        pprint(msg, "NONE")
