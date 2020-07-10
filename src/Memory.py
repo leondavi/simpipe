@@ -38,7 +38,6 @@ class Memory:
                 new_memory_sector = self.fix_reversed_memory(new_memory_sector)
                 self.main_memory += new_memory_sector
             f.close()
-
             # Check if max size is set, and if the total read exceed that size.
             if max_ptr and len(self.main_memory) >= max_ptr:
                 self.main_memory = self.main_memory[0:max_ptr]

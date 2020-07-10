@@ -8,10 +8,13 @@ from RegressionPermutation import *
 from RunModel import *
 from datetime import datetime
 
+# Running the regression list
 def run_rgr():
     now = datetime.now()
     res_filename = "results_"+now.strftime("%m-%d-%Y-%H_%M_%S")+".csv"
     mem_params = mem_params_from_args()
+
+    # Extract path to where write the results of regression
     if os.path.isfile(mem_params["mem_path"]):
         mem_path = pathlib.Path(mem_params['mem_path'])
         file_path = mem_path.parents[0] / res_filename
@@ -24,7 +27,7 @@ def run_rgr():
     report_writer = csv.writer(csv_file)
 
     rgr_db = RegressionPermutation(RGR)
-    report_writer.writerow(rgr_db.key_list + ["IPC"])
+    report_writer.writerow(rgr_db.key_list + ["IPC", "INSTS", "TICKS"])
     for perm_list in rgr_db.perm_list_of_lists:
         params_dict = dict()
         params_list = list()
@@ -37,6 +40,8 @@ def run_rgr():
         x = RunModel(mem_params, params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
+        params_list.append(format(x.pipeline.inst_committed))
+        params_list.append(format(x.pipeline.last_tick))
 
         report_writer.writerow(params_list)
         del x, params_dict, params_list
@@ -95,7 +100,7 @@ if __name__ == '__main__':
     args_params["verbose"] = False
     args_params["csv_output"] = False
     args_params["dir"] = SIMULATION_FILE
-    args_params["ptrMax"] = None
+    args_params["ptrMax"] = PTRMAX
     args_params["en_anomaly"] = DEFAULT_EN_ANOMALY
 
     for arg in sys.argv[1:]:
