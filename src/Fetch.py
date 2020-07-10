@@ -33,9 +33,6 @@ class Fetch:
 
     def fetch(self):
 
-         #TODO
-
-        print("inst ptr: "+str(self.NextInstMemPtr))
         # Check that the address is valid.
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
             return False
@@ -74,7 +71,6 @@ class Fetch:
                 self.fetchQueue.push(Instruction.empty_inst(self.tid, "dummy", False))
                 self.dummy_inst_count += 1
 
-        print("inst count "+str(self.prefetch_inst_count))
         return True
 
     # Progress pre-fetching, checks if got pending fetch request, and the fetch delay is passed.
