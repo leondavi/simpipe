@@ -1,43 +1,42 @@
 from Fetch import *
 from Memory import Memory
 
+
 class Pipeline:
     # arg
-    # fetch_size - Number of instruction that fetch brings from memory each time
-    def __init__(self, memory : Memory, params=dict()):
+    def __init__(self, memory: Memory, params=dict()):
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
         self.fetchUnits = [Fetch(tid, memory, params) for tid in range(0, self.num_threads)]  # Create fetch unit
         self.stages = FIFOQueue(self.num_stages)
         self.stages.set_q_list([Instruction.empty_inst(0)] * self.num_stages)
-        self.wb_inst = Instruction.empty_inst(0)
         self.issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
         self.tid_issue_ptr = 0
         self.tid_prefetch_vld = False
         self.tid_prefetch_ptr = 0
         self.dependency_status = [0 for _ in range(0, self.num_threads)]
         self.speculative = params["SPECULATIVE"] == "True" if "SPECULATIVE" in params.keys() else SPECULATIVE
+        self.issue_inst = Instruction.empty_inst(0)
+        self.committed_inst = Instruction.empty_inst(0)
+        self.wb_inst = Instruction.empty_inst(0)
+        # Verbosity
         self.timer = DEFAULT_TIMEOUT
+        self.verb = params["VERB"] if "VERB" in params.keys() else VERB
         # Statistics
         self.last_tick = 0
-        self.inst_committed = 0
+        self.count_inst_committed = 0
+        self.inst_flushed = 0
         self.ipc = 0
 
-    def headers_str(self):  # TODO - update the pipe EX as the remain instruction,WB=last commit/dropped inst from queue
-        return ["Time"]+["Next Fetch"] + ["Q"+str(n) for n in range(0, self.num_threads)] + ["IS", "DE", "EX", "WB"]
-
-    def print_tick(self, cur_tick):
-        if not VERB_ON:
-            return
-        q_sts = [str(self.fetchUnits[i].fetchQueue.len()) for i in range(0, self.num_threads)]
-        p_inst = [self.stages.q_list[i].str() for i in range(0, self.stages.size)]
-        p_id = self.tid_prefetch_ptr if self.tid_prefetch_vld else "x"
-        print("{0:<5},{1:^5},{2:^8},{3:^50},{4} {5} {6} {7}".format(
-            cur_tick, p_id, ",".join(q_sts), ",".join(p_inst), self.wb_inst.full_str(), self.wb_inst.num ,
-            self.wb_inst.pc, self.inst_committed))
-
+    # The main function that happens every cycle and responsible on the progress of the pipeline.
+    # Check if all thread are done
+    # Checking which instruction is committed and how it influences the pipeline
+    # Select an issue thread
+    # update prefetch
+    # Tick the sub-blocks (prefetch)
+    # Update statistic and print the current status of the pipeline (Optional)
     def tick(self, cur_tick):
-        # Checking if all threads finished there fetching
+        # Checking if all threads finished there execution
         if self.check_done():
             return False
 
@@ -63,6 +62,20 @@ class Pipeline:
         self.print_tick(cur_tick)
         return True
 
+    def headers_str(self):
+        return ["Time"]+["Next Fetch"] + ["Q"+str(n) for n in range(0, self.num_threads)] + ["IS", "DE", "EX", "WB"]
+
+    def print_tick(self, cur_tick):
+        if not VERB_ON:
+            return
+        q_sts = [str(self.fetchUnits[i].fetchQueue.len()) for i in range(0, self.num_threads)]
+        p_inst = [self.stages.q_list[i].str() for i in range(0, self.stages.size)]
+        p_id = self.tid_prefetch_ptr if self.tid_prefetch_vld else "x"
+        msg = "{0:<5},{1:^5},{2:^8},{3:^50},{4} {5} {6} {7}".format(
+            cur_tick, p_id, ",".join(q_sts), ",".join(p_inst), self.wb_inst.full_str(), self.wb_inst.num,
+            self.wb_inst.pc, self.count_inst_committed)
+        pprint(msg, "NORM")
+
     # Check Between all thread, who is legit for fetching
     def set_prefetch(self, cur_tick):
         self.tid_prefetch_vld = False
@@ -87,15 +100,15 @@ class Pipeline:
         self.wb_inst = self.stages.front()
 
         if req_list[self.tid_issue_ptr]:
-            inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.pop()
-            self.stages.push(inst)
+            self.issue_inst = self.fetchUnits[self.tid_issue_ptr].fetchQueue.pop()
+            self.stages.push(self.issue_inst)
         else:  # Push empty inst
             self.stages.push(Instruction.empty_inst(0))
 
     def set_commit(self):
-        inst = self.stages.front()
-        if inst.empty_inst == 0 and inst.br_taken == 1:
-            self.flush_pipe(inst.tid, inst.num)
+        self.committed_inst = self.stages.front()
+        if self.committed_inst.empty_inst == 0 and self.committed_inst.br_taken == 1:
+            self.flush_pipe(self.committed_inst.tid, self.committed_inst.num)
 
     def update_dependency(self, cur_tick):
         inst = self.stages.back()
@@ -109,16 +122,17 @@ class Pipeline:
         # count how many valid instruction committed
         self.last_tick = cur_tick
         if not self.wb_inst.empty_inst:
-            self.inst_committed += 1
+            self.count_inst_committed += 1
             self.timer = DEFAULT_TIMEOUT
         else:
             self.timer -= 1
 
         if self.last_tick:  # Avoid division by zero
-            self.ipc = float(self.inst_committed / self.last_tick)
+            self.ipc = float(self.count_inst_committed / self.last_tick)
 
     def report_statistics(self):
-        print("Inst Committed {0} ipc {1:.3f}".format(self.inst_committed, self.ipc))
+        msg = "Inst Committed {0} ipc {1:.3f}".format(self.count_inst_committed, self.ipc)
+        pprint(msg, "NONE")
 
     def flush_pipe(self, tid, cur_num):
         for i in range(0, self.stages.size-1):
