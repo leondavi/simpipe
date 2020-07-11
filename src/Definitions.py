@@ -9,13 +9,13 @@ DEFAULT_EN_ANOMALY = False
 NUM_THREADS = 2
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False]
-ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
-PREFETCH_POLICY = "RR_ANOMALY" # ["RR","RR_ANOMALY"]
+ISSUE_POLICY = "RR"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+PREFETCH_POLICY = "RR"  # ["RR","RR_ANOMALY"]
 # Control args
 VERB_ON = True
-DEFAULT_TIMEOUT = -1  # Number of ticks without instruction, setting to -1 will turn it off
+DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 6300000
-PTRMAX = 200
+PTRMAX = 20
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NORM"  # [0,1,2]
 
@@ -25,19 +25,28 @@ def pprint(msg, verb="DEBUG"):
         print(msg)
 
 
+def round_robin(ptr, req, size):
+    for i in range(0, size):
+        ptr = (ptr+1) % size
+        if req[ptr]:
+            return ptr
+    return ptr
+
+
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
 PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
+HAZARD_MEM_DELAY = 1
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
 num_thread_list = [1, 2, 4, 8, 16]
-issue_policy_list = ["RR","RR_ANOMALY_PERSISTENT"] #["RR", "COARSE", "EVENT"]
+issue_policy_list = ["RR", "RR_ANOMALY_PERSISTENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4, 5]
-prefetch_delay_list = [2,4,6,8,10]
+prefetch_delay_list = [2, 4, 6, 8, 10]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
@@ -47,7 +56,7 @@ FAST_RGR = [["NUM_THREAD", [2]], ["ISSUE_POLICY", ["RR"]], ["SPECULATIVE", [Fals
             ["NUM_STAGES", [4]], ["PREFETCH_DELAY", [3]]]
 
 #RGR = FAST_RGR
-
+REGISTER_NUM = 32
 OPCODE = {
     "0110111": "LUI",
     "0010111": "AUIPC",

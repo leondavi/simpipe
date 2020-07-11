@@ -1,7 +1,7 @@
 from Definitions import *
 from Memory import Memory
 
-CSV_IDX_DICT = {"pc": 1,"m_inst":5, "inst_name": 7, "br_taken": 8}
+CSV_IDX_DICT = {"pc": 1, "m_inst": 5, "inst_name": 7, "br_taken": 8}
 # CSV_IDX_DICT = {"tick_rec":0, "pc":1, "dpc":2, "pc_req_":3,dpc_req,m_inst,inst_grp,cname,br_taken
 
 
@@ -15,6 +15,7 @@ class Instruction:
         self.tid = tid
         self.num = inst_num
         self.empty_inst = empty_inst
+        self.inst_commit = 0
         self.anomaly = False
         # Inst fields
         self.name = "NOP"
@@ -27,7 +28,10 @@ class Instruction:
         self.rs2 = ""
 
     def str(self):
-        return "T{0}-{1}".format(self.tid, self.inst_name)
+        if self.inst_name == "Bubble":
+            return self.inst_name
+        else:
+            return "T{0}-{1}".format(self.tid, self.inst_name)
 
     def full_str(self):
         return "{0}-BT-{1}-E{2} {3} {4}".format(self.str(), self.br_taken, self.empty(), self.m_inst[::-1], self.isa_str())
@@ -96,14 +100,14 @@ class Instruction:
     def __bool__(self):
         return not self.empty_inst
 
-    def __eq__(self,other):
+    def __eq__(self, other):
         return (self.pc == other.pc) and (self.tid == other.tid) and (self.m_inst == other.m_inst)
 
-    def __ne__(self,other):
+    def __ne__(self, other):
         return not self == other
 
     @staticmethod
-    def inst_from_row(memory : Memory, ptr : int, tid):
+    def inst_from_row(memory: Memory, ptr: int, tid):
         csv_row = memory.get_row(ptr)
         csv_keys = memory.get_instruction_keys()
         new_inst = Instruction()
@@ -124,7 +128,7 @@ class Instruction:
 
 
     @staticmethod
-    def empty_inst(tid, name="bubble", empty_inst=True):
+    def empty_inst(tid, name="Bubble", empty_inst=True):
         return Instruction(tid, "Z", name, "x", empty_inst)
 
     def delta_pc(self, inst):

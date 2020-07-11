@@ -8,6 +8,7 @@ from RegressionPermutation import *
 from RunModel import *
 from datetime import datetime
 
+
 # Running the regression list
 def run_rgr():
     now = datetime.now()
@@ -19,7 +20,7 @@ def run_rgr():
         mem_path = pathlib.Path(mem_params['mem_path'])
         file_path = mem_path.parents[0] / res_filename
     else:
-        file_path =  pathlib.Path(mem_params['mem_path']) / res_filename
+        file_path = pathlib.Path(mem_params['mem_path']) / res_filename
 
     print(file_path)
 

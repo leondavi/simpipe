@@ -113,19 +113,19 @@ class Fetch:
     def fetch_done(self):
         return self.mem_done() and (not self.prefetch_ongoing) and (self.fetchQueue.len() == 0)
 
-    def flush_fetch(self, next_num):
+    def flush(self, next_num):
         self.flushed_inst_count += self.fetchQueue.len()
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
         self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?
 
     def report_statistics(self):
-        print("Fetch TID={0} prefetched_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} mem_delay={5} next_ptr={6}".format(
-            self.tid, self.prefetch_inst_count, self.dummy_inst_count,self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
-            self.NextInstMemPtr))
+        print("Fetch TID={0} prefetch_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} " 
+              "mem_delay={5} next_ptr={6}".format(self.tid, self.prefetch_inst_count, self.dummy_inst_count,
+                                                  self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
+                                                  self.NextInstMemPtr))
 
-    #anomaly functions
-
+    # anomaly functions
     def anomaly_logic(self):
         if not self.anomaly_enabled:
             return False
