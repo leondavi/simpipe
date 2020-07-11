@@ -1,11 +1,11 @@
 from Instruction import *
 
-
 # Used as a stage In the pipeline
 class Issue:
     def __init__(self,  params=dict()):
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
+        self.speculative = params["SPECULATIVE"] == "True" if "SPECULATIVE" in params.keys() else SPECULATIVE
         self.issue_ptr = 0
         self.issue_empty = True  # Indication if got pending instruction
         self.issue_inst = Instruction()
@@ -20,16 +20,16 @@ class Issue:
     # Check if there exists an instruction in issue, if the instruction can be executed push it
     # into next unit.
     # After that, check if the instruction is pushed, if so, schedules the next one.
-    def tick(self, tick):
+    def tick(self, cur_tick):
         # Check if there is an instruction in issue and try push it into execute
         if not self.issue_empty:
-            self.push_inst(tick)
+            self.push_inst(cur_tick)
         else:
             self.execute_unit.push(Instruction.empty_inst(0))
 
         # Check if the current instruction is issued, if so, schedule for next cycle
         if self.issue_empty:
-            self.schedule_inst()
+            self.schedule_inst(cur_tick)
 
     # Check if issue need to be cleared in case of flush
     def flush(self, tid):
@@ -47,15 +47,15 @@ class Issue:
     def push_inst(self, tick):
         tid = self.issue_inst.tid
         if not self.thread_unit[tid].got_dependency(self.issue_inst, tick):
-            self.thread_unit[tid].set_dependency(self.issue_inst, tick)  # TODO -what is the latency
+            self.thread_unit[tid].set_dependency(self.issue_inst, tick, self.speculative)  # TODO -what is the latency
             self.execute_unit.push(self.issue_inst)
             self.issue_empty = True
         else:
             self.execute_unit.push(Instruction.empty_inst(0))
 
-    def schedule_inst(self):
+    def schedule_inst(self, cur_tick):
         fetch_list = [self.fetch_unit[tid].fetchQueue.len() for tid in range(0, self.num_threads)]
-        self.update_policy()
+        self.update_policy(cur_tick)
         self.issue_ptr = round_robin(self.issue_ptr, fetch_list, self.num_threads)
 
         if fetch_list[self.issue_ptr]:
@@ -67,25 +67,25 @@ class Issue:
 
     # --------------- Policies ---------------#
 
-    def update_policy(self):
+    def update_policy(self, cur_tick):
         if self.issue_policy == "EVENT":
-            self.event_policy()
+            self.event_policy(cur_tick)
         elif self.issue_policy == "COARSE":
-            self.coarse_policy()
+            self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
         elif self.issue_policy == "RR_ANOMALY_PERSISTENT":
             self.round_robin_anomaly_persistent_policy()
         elif self.issue_policy == "RR":
             pass
 
-    # Coarse - save the pointer on the same spot
-    def coarse_policy(self):
-        self.issue_ptr = (self.issue_ptr - 1) % self.num_threads
-
     # Event - next instruction
-    def event_policy(self):
-        if self.fetchUnits[self.issue_ptr].fetchQueue.len() != 0:
-            next_inst = self.fetchUnits[self.issue_ptr].fetchQueue.front()
+    def event_policy(self, cur_tick):
+        if self.fetch_unit[self.issue_ptr].fetchQueue.len() != 0:
+            next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
             # check if next cycle the instruction will pass Issue
-            if next_inst.is_event():  # TODO - create is event
-                self.coarse_policy()
+            if next_inst.is_event() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
+                self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+
+    def report_model(self):
+        print("Issue Thread_num={0} Issue_policy={1} speculative={2} flushed={3}"
+              .format(self.num_threads, self.issue_policy, self.speculative, self.count_flushed_inst))
 

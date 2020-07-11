@@ -42,16 +42,18 @@ class Instruction:
     def empty(self):
         return 1 if self.empty_inst else 0
 
-    def got_dependency(self):
-        #is_store = self.inst_opcode == "LOAD"
-        is_store = False
+    def is_event(self):
+        is_store = self.inst_opcode == "LOAD"
         is_branch = self.inst_opcode in ["JAL", "JALR", "BRANCH"]
-        return is_store or is_branch
+        is_muldiv = (self.inst_opcode in MULDIV.values()) or (self.inst_opcode in MULDIV64.values())
+        return is_store or is_branch or is_muldiv
 
     def decode_inst(self):
         assert self.m_inst[0:2] == "11", "Support only ILEN 32"
         opcode = (self.m_inst[0:7])[::-1]
         func3 = int((self.m_inst[12:15])[::-1], 2)
+        immd_25 = int((self.m_inst[25])[::-1], 2)
+        # pprint(self.inst_name, "DEBUG")
         assert opcode in OPCODE.keys(), "Unknown opcode {0}, supported RV64I ".format(opcode)
         self.inst_opcode = OPCODE[opcode]
         if self.inst_opcode == "BRANCH":
@@ -69,16 +71,26 @@ class Instruction:
             if self.name == "SRI":
                 self.name = SRI[int(self.m_inst[30])]
         elif self.inst_opcode == "ALU":
-            assert func3 in ALU.keys(), "Unknown ALU func3 {0}".format(func3)
-            self.name = ALU[func3]
+            if immd_25 == 1:
+                assert func3 in MULDIV.keys(), "Unknown MULDIV func3 {0}".format(func3)
+                self.name = MULDIV[func3]
+            else:
+                assert func3 in ALU.keys(), "Unknown ALU func3 {0}".format(func3)
+                self.name = ALU[func3]
             if self.name == "ADD_SUB":
                 self.name = ADD_SUB[int(self.m_inst[30])]
             elif self.name == "SR":
                 self.name = SR[int(self.m_inst[30])]
-        elif self.inst_name == "ALUWI":
-            assert 0 # TODO - not suportted yet
-        elif self.inst_name == "ALUW":
-            assert 0  # TODO - not suportted yet
+        elif self.inst_opcode == "ALUIW":
+            assert func3 in ALUIW.keys(), "Unknown ALUIW func3 {0}".format(func3)
+            self.name = ALUIW[func3]
+        elif self.inst_opcode == "ALUW":
+            if immd_25 == 1:
+                assert func3 in MULDIV64.keys(), "Unknown MULDIV64 func3 {0}".format(func3)
+                self.inst_opcode = MULDIV64[func3]
+            else:
+                assert func3 in ALUW.keys(), "Unknown ALUW func3 {0}".format(func3)
+                self.inst_opcode = ALUW[func3]
         else:
             self.name = self.inst_opcode
         self.decode_operands()

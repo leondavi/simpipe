@@ -10,6 +10,7 @@ class Thread:
         # Used as
         self.ready_registers = [0 for _ in range(0, REGISTER_NUM)]  # TODO -?
         self.ready = 0
+        # statistics
 
     # Return True if command won't be able to execute
     # TODO - can be more sophisticate
@@ -17,13 +18,15 @@ class Thread:
         return tick <= self.ready
 
     # Update the register with dependence
-    def set_dependency(self, inst, tick):
+    def set_dependency(self, inst, tick, speculative):
         # In case no RD or  the target is R0 no dependency update required
         if inst.inst_opcode in ["JAL", "JALR", "BRANCH"]:
-            self.ready = tick + self.num_stages - 1
+            self.ready = tick + (not speculative) * (self.num_stages - 1)
         if inst.inst_opcode == "LOAD":
             self.ready = tick + HAZARD_MEM_DELAY
-        # TODO  MUL/DIV
+        if (inst.inst_opcode in MULDIV.values()) or (inst.inst_opcode in MULDIV64.values()):
+            self.ready = tick + HAZARD_MULDIV_DELAY
+
 
     # Clear any latency a register got
     def flush(self):

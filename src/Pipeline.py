@@ -20,7 +20,6 @@ class Pipeline:
         self.prefetch_policy = params["PREFETCH_POLICY"] if "PREFETCH_POLICY" in params.keys() else PREFETCH_POLICY
         self.tid_prefetch_vld = False
         self.tid_prefetch_ptr = 0
-        self.speculative = params["SPECULATIVE"] == "True" if "SPECULATIVE" in params.keys() else SPECULATIVE
         # Verbosity
         self.timer = DEFAULT_TIMEOUT
         # Statistics
@@ -125,7 +124,7 @@ class Pipeline:
                 self.tid_issue_ptr = tid-1 % self.num_threads
                 return
 
-    # Check if all units are done = TODO - add a check from all pipe units
+    # Check if all units are done
     def check_done(self):
         # Check all fetch units are done = last inst + no pending inst + queue is empty
         fetch_done = all([self.fetch_unit[i].fetch_done() for i in range(0, self.num_threads)])
@@ -147,17 +146,19 @@ class Pipeline:
 
         if self.last_tick:  # Avoid division by zero
             self.ipc = float(self.execute_unit.count_committed_inst / self.last_tick)
+
         self.count_flushed_inst = self.issue_unit.count_flushed_inst + self.execute_unit.count_flushed_inst +\
             sum([self.fetch_unit[idx].flushed_inst_count for idx in range(0, self.num_threads)])
 
     def report_model(self):
         for tid_idx in range(0, self.num_threads):
             self.fetch_unit[tid_idx].report_statistics()
-        print("Num Thread={0}, Speculative={1}, stage={2}".format(
-            self.num_threads, self.speculative, self.execute_unit.num_stages))
+        self.issue_unit.report_model()
+        self.execute_unit.report_model()
+        print("Num Thread={0}, stage={1}".format(
+            self.num_threads, self.execute_unit.num_stages))
 
     def report_statistics(self):
-        pass
         msg = "Inst Committed {0} ipc {1:.3f} flushed {2}".format(
             self.execute_unit.count_committed_inst, self.ipc, self.count_flushed_inst)
         pprint(msg, "NONE")

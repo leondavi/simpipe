@@ -53,3 +53,7 @@ class Execute:
 
     def push(self, inst):
         self.stages.push(inst)
+
+    def report_model(self):
+        print("Execute Stages={0} Committed_instruction={1} flushed={2}"
+              .format(self.num_stages, self.count_committed_inst, self.count_flushed_inst))
