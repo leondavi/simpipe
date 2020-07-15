@@ -16,8 +16,9 @@ PREFETCH_POLICY = "RR_ANOMALY"  # ["RR","RR_ANOMALY"]
 # Control args
 VERB_ON = True
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
-PTRMAX = 6300000
-PTRMAX = 20
+# PTRMAX = 6300000
+# PTRMAX = 20
+PTRMAX = None # no limit
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "DEBUG"  # [0,1,2]
 

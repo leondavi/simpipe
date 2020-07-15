@@ -1,4 +1,5 @@
 from Instruction import *
+from Fetch import Fetch
 
 # Used as a stage In the pipeline
 class Issue:
@@ -15,6 +16,8 @@ class Issue:
         self.thread_unit = None
         self.fetch_unit = None
         self.execute_unit = None
+        #anomaly
+        self.anomaly_enabled = params['en_anomaly']
 
     # Tick issue state
     # Check if there exists an instruction in issue, if the instruction can be executed push it
@@ -78,13 +81,16 @@ class Issue:
             pass
 
     def round_robin_anomaly_persistent_policy(self):
+        if not self.anomaly_enabled:
+            return
 
-        if self.thread_unit[self.issue_ptr].is_anomaly() and self.fetch_unit[self.issue_ptr].fetchQueue:
+        anomaly_in_queue = Fetch.check_for_anomaly_in_Queue(self.fetch_unit[self.issue_ptr].fetchQueue) # check if anoamly still exists
+        if not anomaly_in_queue: # if there is not anomaly or queue is empty set anomaly to false
+            self.thread_unit[self.issue_ptr].set_anomaly(False)
+
+        if self.thread_unit[self.issue_ptr].is_anomaly():
             self.issue_ptr -= 1  # RR performs +1 so we force it to be persistent
             return
-        # when queue is empty - shut off the anomaly flag
-        elif not self.fetch_unit[self.issue_ptr].fetchQueue:
-            self.thread_unit[self.issue_ptr].set_anomaly(False)
 
         tmp_ptr = self.issue_ptr
         for tid in range(0,self.num_threads):

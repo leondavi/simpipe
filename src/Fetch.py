@@ -129,9 +129,17 @@ class Fetch:
         if not self.anomaly_enabled:
             return False
 
-        for i in range(0,int(self.fetchQueue.len()/2)):
-            if self.fetchQueue.at(i).anomaly:
-                self.thread_unit[self.tid].set_anomaly(True)
-
+        if self.check_for_anomaly_in_Queue(self.fetchQueue):
+            self.thread_unit[self.tid].set_anomaly(True)
         return self.thread_unit[self.tid].is_anomaly()
 
+
+    @staticmethod
+    def check_for_anomaly_in_Queue(Queue : FIFOQueue):
+        if Queue.len() == 0:
+            return False
+
+        for i in range(0,int(Queue.len()-1)):
+            if Queue.at(i).anomaly:
+                return True
+        return False
