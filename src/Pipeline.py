@@ -29,6 +29,11 @@ class Pipeline:
 
     # Connect between the class's
     def connect(self):
+
+        # Fetch Unit
+        for tid in range(0,self.num_threads):
+            self.fetch_unit[tid].thread_unit = self.thread_unit
+
         # Issue Unit
         # - thread_unit - Checks thread info and dependency
         # - fetch_unit - check the instruction inside the fetch
@@ -76,7 +81,7 @@ class Pipeline:
         fetch_sts = [str(self.fetch_unit[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         issue_sts = self.issue_unit.get_status()
         execute_sts = self.execute_unit.get_status()
-        thread_sts = [str(self.thread_unit[i].ready)for i in range(0, self.num_threads)]
+        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+","+str(int(self.thread_unit[i].anomaly)) for i in range(0, self.num_threads)]
         msg = "{0:<5},{1:^5},{2},{3:^15}, {4:^35} \t, {5}".format(
             cur_tick, prefetch_id, ",".join(fetch_sts), issue_sts, execute_sts, ",".join(thread_sts))
         pprint(msg, "NORM")
@@ -105,24 +110,11 @@ class Pipeline:
          and set it to next fetch if no anomaly
         '''
         for tid in range(0,self.num_threads):
-            valid = not self.fetchUnits[tid].fetchQueue and\
-            not self.fetchUnits[tid].fetch_done and\
-            not self.fetchUnits[tid].anomaly_flag
+            valid = not self.fetch_unit[tid].fetchQueue and\
+            not self.fetch_unit[tid].fetch_done and\
+            not self.thread_unit[tid].is_anomaly()
             if valid:
                 self.tid_prefetch_ptr = tid-1 % self.num_threads
-
-    def round_robin_anomaly_persistent_policy(self):
-
-        if self.fetchUnits[self.tid_issue_ptr].anomaly_flag and self.fetchUnits[self.tid_issue_ptr].fetchQueue:
-            self.tid_issue_ptr -= 1  # RR performs +1 so we force it to be persistent
-            return
-
-        for tid in range(0,self.num_threads):
-            valid = self.fetchUnits[tid].fetchQueue and\
-                    self.fetchUnits[tid].anomaly_flag
-            if valid:
-                self.tid_issue_ptr = tid-1 % self.num_threads
-                return
 
     # Check if all units are done
     def check_done(self):

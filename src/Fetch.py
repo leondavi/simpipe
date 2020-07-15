@@ -26,7 +26,7 @@ class Fetch:
         self.flushed_inst_count = 0
         self.dummy_inst_count = 0
         self.anomaly_enabled = params['en_anomaly']
-        self.anomaly_flag = False
+        self.thread_unit = None
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -91,7 +91,6 @@ class Fetch:
             return False
         # anomaly case
         if self.anomaly_logic():
-            print("tid"+str(self.tid)+" Anomaly")
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -130,19 +129,9 @@ class Fetch:
         if not self.anomaly_enabled:
             return False
 
-        self.set_anomaly(self.anomaly_check())
-        return self.anomaly_flag
-
-    def set_anomaly(self,val = True):
-        self.anomaly_flag = val
-
-    #whil anomaly appears in queue then there is anomaly
-    def anomaly_check(self):
-        found_inst = Instruction()
         for i in range(0,int(self.fetchQueue.len()/2)):
             if self.fetchQueue.at(i).anomaly:
-                found_inst = self.fetchQueue.at(i)
-                self.last_anomaly_inst = found_inst
-                return True
-        self.last_anomaly_inst = found_inst
-        return False
+                self.thread_unit[self.tid].set_anomaly(True)
+
+        return self.thread_unit[self.tid].is_anomaly()
+

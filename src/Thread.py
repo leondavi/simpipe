@@ -12,6 +12,9 @@ class Thread:
         self.ready = 0
         # statistics
 
+        #anomaly
+        self.anomaly = False
+
     # Return True if command won't be able to execute
     # TODO - can be more sophisticate
     def got_dependency(self, inst, tick):
@@ -31,3 +34,10 @@ class Thread:
     # Clear any latency a register got
     def flush(self):
         self.ready_registers = [0 for _ in range(0, REGISTER_NUM)]
+
+
+    def set_anomaly(self,val = True):
+        self.anomaly = val
+
+    def is_anomaly(self):
+        return self.anomaly

@@ -5,14 +5,14 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = False
+DEFAULT_EN_ANOMALY = True
 
 # Simulation ARGS
 NUM_THREADS = 2
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = "EVENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
-PREFETCH_POLICY = "RR"  # ["RR","RR_ANOMALY"]
+ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+PREFETCH_POLICY = "RR_ANOMALY"  # ["RR","RR_ANOMALY"]
 # Control args
 VERB_ON = True
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off

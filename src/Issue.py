@@ -77,6 +77,24 @@ class Issue:
         elif self.issue_policy == "RR":
             pass
 
+    def round_robin_anomaly_persistent_policy(self):
+
+        if self.thread_unit[self.issue_ptr].is_anomaly() and self.fetch_unit[self.issue_ptr].fetchQueue:
+            self.issue_ptr -= 1  # RR performs +1 so we force it to be persistent
+            return
+        # when queue is empty - shut off the anomaly flag
+        elif not self.fetch_unit[self.issue_ptr].fetchQueue:
+            self.thread_unit[self.issue_ptr].set_anomaly(False)
+
+        tmp_ptr = self.issue_ptr
+        for tid in range(0,self.num_threads):
+            tmp_ptr = (tmp_ptr+1) % self.num_threads
+            anomaly_case = self.fetch_unit[tmp_ptr].fetchQueue and\
+                            self.thread_unit[tmp_ptr].is_anomaly()
+            if anomaly_case:
+                self.issue_ptr = (tmp_ptr-1) % self.num_threads # -1 so in the next round robin it will point on it
+                return
+
     # Event - next instruction
     def event_policy(self, cur_tick):
         if self.fetch_unit[self.issue_ptr].fetchQueue.len() != 0:
