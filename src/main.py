@@ -41,9 +41,9 @@ def run_rgr():
         x = RunModel(mem_params, params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
-        params_list.append(x.pipeline.inst_committed)
+        #params_list.append(x.pipeline.inst_committed)
         params_list.append(x.pipeline.last_tick)
-        params_list.append(x.pipeline.flushed_inst_count)
+        #params_list.append(x.pipeline.flushed_inst_count)
 
         report_writer.writerow(params_list)
         del x, params_dict, params_list

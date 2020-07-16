@@ -131,6 +131,8 @@ class Fetch:
 
         if self.check_for_anomaly_in_Queue(self.fetchQueue):
             self.thread_unit[self.tid].set_anomaly(True)
+        else:
+            self.thread_unit[self.tid].set_anomaly(False)
         return self.thread_unit[self.tid].is_anomaly()
 
 
