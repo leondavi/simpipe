@@ -11,16 +11,16 @@ DEFAULT_EN_ANOMALY = True
 NUM_THREADS = 2
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = "RR_ANOMALY_PERSISTENT"  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
-PREFETCH_POLICY = "RR_ANOMALY"  # ["RR","RR_ANOMALY"]
+ISSUE_POLICY = ["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+PREFETCH_POLICY = ["RR_ANOMALY","RR"]  # ["RR","RR_ANOMALY"]
 # Control args
-VERB_ON = True
+VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 # PTRMAX = 20
 PTRMAX = None # no limit
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
-VERB = "DEBUG"  # [0,1,2]
+VERB = "NONE"  # [0,1,2]
 
 
 def pprint(msg, verb="DEBUG"):
@@ -42,7 +42,7 @@ num_thread_list = [1, 2, 4, 8, 16]
 issue_policy_list = ["RR", "RR_ANOMALY_PERSISTENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4, 5]
-prefetch_delay_list = [2, 4, 6, 8, 10]
+prefetch_delay_list = [2, 4, 6, 8]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],

@@ -109,12 +109,16 @@ class Pipeline:
          finds an empty fetch queue that is not in an anomaly state
          and set it to next fetch if no anomaly
         '''
+
+        tmp_ptr = self.tid_prefetch_ptr
         for tid in range(0,self.num_threads):
-            valid = not self.fetch_unit[tid].fetchQueue and\
-            not self.fetch_unit[tid].fetch_done and\
-            not self.thread_unit[tid].is_anomaly()
+            tmp_ptr = (tmp_ptr + 1) % self.num_threads
+            valid = not self.fetch_unit[tmp_ptr].fetchQueue and\
+            not self.fetch_unit[tmp_ptr].fetch_done and\
+            not self.thread_unit[tmp_ptr].is_anomaly()
             if valid:
-                self.tid_prefetch_ptr = tid-1 % self.num_threads
+                self.tid_prefetch_ptr = (tmp_ptr-1) % self.num_threads
+                return
 
     # Check if all units are done
     def check_done(self):
