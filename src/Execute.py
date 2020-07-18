@@ -20,14 +20,32 @@ class Execute:
         self.thread_unit = None
         self.issue_unit = None
         self.fetch_unit = None
+        # Anomaly
+        self.anomaly_enabled = params['en_anomaly']
 
     # Update the information inside the execute
     def tick(self, cur_tick):
         # Save the Instruction that is committing
         self.committed_inst = self.stages.front()
         self.count_committed_inst += not self.committed_inst.empty_inst
+        self.update_anomaly()
+
+
         if (not self.committed_inst.empty_inst) and (self.committed_inst.br_taken == 1):
             self.flush()
+
+    def update_anomaly(self):
+        if not self.anomaly_enabled:
+            return
+        if not self.committed_inst.anomaly:
+            return
+
+        tid = self.committed_inst.tid
+        self.thread_unit[tid].set_anomaly(False,"Execute")
+        self.thread_unit[tid].set_anomaly(False,"Fetch")
+        self.fetch_unit[tid].set_anomaly()
+
+
 
     # Clear thread from the pipeline
     def flush(self):
@@ -41,6 +59,10 @@ class Execute:
         self.thread_unit[tid].flush()
         self.issue_unit.flush(tid)
         self.fetch_unit[tid].flush(next_inst_num)
+
+        if self.anomaly_enabled:
+            self.thread_unit[tid].set_anomaly(False, "Execute")
+            self.thread_unit[tid].set_anomaly(False, "Fetch")
 
     def done(self):
         return all([self.stages.q_list[i].empty_inst for i in range(0, self.stages.size)])

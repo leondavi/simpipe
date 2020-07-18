@@ -77,6 +77,7 @@ class Fetch:
     def tick(self, cur_tick):
         if self.prefetch_ongoing and (self.prefetch_cycle + self.prefetch_delay <= cur_tick):
             self.fetch()
+            self.set_anomaly()
             self.prefetch_ongoing = False
 
     # Change fetch status
@@ -90,7 +91,7 @@ class Fetch:
         if self.prefetch_ongoing or self.mem_done():
             return False
         # anomaly case
-        if self.anomaly_logic():
+        if self.anomaly_enabled and self.thread_unit.is_anomaly():
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -125,23 +126,20 @@ class Fetch:
                                                   self.NextInstMemPtr))
 
     # anomaly functions
-    def anomaly_logic(self):
+    def set_anomaly(self) -> None:
         if not self.anomaly_enabled:
+            return
+
+        if self.check_for_anomaly_in_Queue():
+            self.thread_unit.set_anomaly(True)
+
+
+
+    def check_for_anomaly_in_Queue(self):
+        if self.fetchQueue.len() == 0:
             return False
 
-        if self.check_for_anomaly_in_Queue(self.fetchQueue):
-            self.thread_unit[self.tid].set_anomaly(True)
-        else:
-            self.thread_unit[self.tid].set_anomaly(False)
-        return self.thread_unit[self.tid].is_anomaly()
-
-
-    @staticmethod
-    def check_for_anomaly_in_Queue(Queue : FIFOQueue):
-        if Queue.len() == 0:
-            return False
-
-        for i in range(0,int(Queue.len()-1)):
-            if Queue.at(i).anomaly:
+        for i in range(0,int(self.fetchQueue.len())):
+            if self.fetchQueue.at(i).anomaly:
                 return True
         return False

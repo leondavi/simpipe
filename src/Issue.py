@@ -64,6 +64,8 @@ class Issue:
         if fetch_list[self.issue_ptr]:
             self.issue_inst = self.fetch_unit[self.issue_ptr].fetchQueue.pop()
             self.issue_empty = False
+            if self.issue_inst.anomaly and self.anomaly_enabled:
+                self.thread_unit[self.issue_ptr].set_anomaly(True,stage="Execute")
         else:  # Push empty inst
             self.issue_inst = Instruction.empty_inst(0)
             self.issue_empty = True
@@ -84,11 +86,7 @@ class Issue:
         if not self.anomaly_enabled:
             return
 
-        anomaly_in_queue = Fetch.check_for_anomaly_in_Queue(self.fetch_unit[self.issue_ptr].fetchQueue) # check if anoamly still exists
-        if not anomaly_in_queue: # if there is not anomaly or queue is empty set anomaly to false
-            self.thread_unit[self.issue_ptr].set_anomaly(False)
-
-        if self.thread_unit[self.issue_ptr].is_anomaly():
+        if self.thread_unit[self.issue_ptr].is_anomaly(stage="Fetch") and not self.thread_unit[self.issue_ptr].is_anomaly(stage="Execute"):
             self.issue_ptr -= 1  # RR performs +1 so we force it to be persistent
             return
 
@@ -96,7 +94,7 @@ class Issue:
         for tid in range(0,self.num_threads):
             tmp_ptr = (tmp_ptr+1) % self.num_threads
             anomaly_case = self.fetch_unit[tmp_ptr].fetchQueue and\
-                            self.thread_unit[tmp_ptr].is_anomaly()
+                            self.thread_unit[self.issue_ptr].is_anomaly(stage="Fetch")
             if anomaly_case:
                 self.issue_ptr = (tmp_ptr-1) % self.num_threads # -1 so in the next round robin it will point on it
                 return

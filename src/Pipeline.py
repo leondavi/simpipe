@@ -31,8 +31,8 @@ class Pipeline:
     def connect(self):
 
         # Fetch Unit
-        for tid in range(0,self.num_threads):
-            self.fetch_unit[tid].thread_unit = self.thread_unit
+        for tid in range(0, self.num_threads):
+            self.fetch_unit[tid].thread_unit = self.thread_unit[tid]
 
         # Issue Unit
         # - thread_unit - Checks thread info and dependency
@@ -81,7 +81,7 @@ class Pipeline:
         fetch_sts = [str(self.fetch_unit[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         issue_sts = self.issue_unit.get_status()
         execute_sts = self.execute_unit.get_status()
-        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+","+str(int(self.thread_unit[i].anomaly)) for i in range(0, self.num_threads)]
+        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+","+str(int(self.thread_unit[i].anomaly_in_fetch))+","+str(int(self.thread_unit[i].anomaly_in_execute)) for i in range(0, self.num_threads)]
         msg = "{0:<5},{1:^5},{2},{3:^15}, {4:^35} \t, {5}".format(
             cur_tick, prefetch_id, ",".join(fetch_sts), issue_sts, execute_sts, ",".join(thread_sts))
         pprint(msg, "NORM")
