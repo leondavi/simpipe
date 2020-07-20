@@ -8,7 +8,7 @@ DEAFULT_TABLE_PREFIX = "histtab_tid_"
 DEFAULT_EN_ANOMALY = True
 
 # Simulation ARGS
-NUM_THREADS = 2
+NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = False  # [True, False] # True - keep push instructions without knowing the result
 ISSUE_POLICY = ["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
@@ -17,7 +17,7 @@ PREFETCH_POLICY = ["RR_ANOMALY","RR"]  # ["RR","RR_ANOMALY"]
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
-# PTRMAX = 20
+#PTRMAX = 2000
 PTRMAX = None # no limit
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
