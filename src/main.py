@@ -28,7 +28,7 @@ def run_rgr():
     report_writer = csv.writer(csv_file)
 
     rgr_db = RegressionPermutation(RGR)
-    report_writer.writerow(rgr_db.key_list + ["IPC", "INSTS", "TICKS","Insts Flushed"])
+    report_writer.writerow(rgr_db.key_list + ["IPC", "INSTS", "TICKS","Insts Flushed Ex","Total Flushed Insts"])
     for perm_list in rgr_db.perm_list_of_lists:
         params_dict = dict()
         params_list = list()
@@ -44,6 +44,7 @@ def run_rgr():
         params_list.append(x.pipeline.execute_unit.count_committed_inst)
         params_list.append(x.pipeline.last_tick)
         params_list.append(x.pipeline.execute_unit.count_flushed_inst)
+        params_list.append(x.pipeline.count_flushed_inst)
 
         report_writer.writerow(params_list)
         del x, params_dict, params_list

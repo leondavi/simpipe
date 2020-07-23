@@ -47,3 +47,6 @@ class FIFOQueue:
 
     def __bool__(self):
         return len(self.q_list) > 0
+
+    def empty(self):
+        return len(self.q_list) == 0

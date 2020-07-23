@@ -81,7 +81,7 @@ class Pipeline:
         fetch_sts = [str(self.fetch_unit[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         issue_sts = self.issue_unit.get_status()
         execute_sts = self.execute_unit.get_status()
-        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+","+str(int(self.thread_unit[i].anomaly_in_fetch))+","+str(int(self.thread_unit[i].anomaly_in_execute)) for i in range(0, self.num_threads)]
+        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+",af-"+str(int(self.thread_unit[i].anomaly_in_fetch))+",ae-"+str(int(self.thread_unit[i].anomaly_in_execute)) for i in range(0, self.num_threads)]
         msg = "{0:<5},{1:^5},{2},{3:^15}, {4:^35} \t, {5}".format(
             cur_tick, prefetch_id, ",".join(fetch_sts), issue_sts, execute_sts, ",".join(thread_sts))
         pprint(msg, "NORM")
@@ -113,9 +113,8 @@ class Pipeline:
         tmp_ptr = self.tid_prefetch_ptr
         for tid in range(0,self.num_threads):
             tmp_ptr = (tmp_ptr + 1) % self.num_threads
-            valid = not self.fetch_unit[tmp_ptr].fetchQueue and\
-            not self.fetch_unit[tmp_ptr].fetch_done and\
-            not self.thread_unit[tmp_ptr].is_anomaly()
+            valid = (self.fetch_unit[tmp_ptr].fetchQueue.len() <= 1) or\
+                    ((not self.thread_unit[tmp_ptr].is_anomaly()) and (not self.fetch_unit[tmp_ptr].fetch_done))
             if valid:
                 self.tid_prefetch_ptr = (tmp_ptr-1) % self.num_threads
                 return

@@ -10,17 +10,18 @@ DEFAULT_EN_ANOMALY = True
 # Simulation ARGS
 NUM_THREADS = 4
 NUM_STAGES = 4
-SPECULATIVE = False  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = ["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
-PREFETCH_POLICY = ["RR_ANOMALY","RR"]  # ["RR","RR_ANOMALY"]
+SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
+ISSUE_POLICY = "RR" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+PREFETCH_POLICY = "RR_ANOMALY"  #["RR_ANOMALY","RR"]  # ["RR","RR_ANOMALY"]
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
-#PTRMAX = 2000
 PTRMAX = None # no limit
+#PTRMAX = 10200
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
+#VERB = "DEBUG"  # [0,1,2]
 
 
 def pprint(msg, verb="DEBUG"):
@@ -30,7 +31,7 @@ def pprint(msg, verb="DEBUG"):
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
-PREFETCH_DELAY = 3  # The delay from the cycle it granted to received
+PREFETCH_DELAY = 4  # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
 HAZARD_MEM_DELAY = 1
@@ -38,11 +39,11 @@ HAZARD_MULDIV_DELAY = 3
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
-num_thread_list = [1, 2, 4, 8, 16]
+num_thread_list = [1, 2, 4, 8]
 issue_policy_list = ["RR", "RR_ANOMALY_PERSISTENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4, 5]
-prefetch_delay_list = [2, 4, 6, 8]
+prefetch_delay_list = [2,3,4]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
