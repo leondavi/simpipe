@@ -91,7 +91,7 @@ class Fetch:
         if self.prefetch_ongoing or self.mem_done():
             return False
         # anomaly case
-        if self.anomaly_enabled and self.thread_unit.is_anomaly() and (not self.fetchQueue.len() == 0):
+        if self.anomaly_enabled and self.thread_unit.is_anomaly() and (self.fetchQueue.len() >= 4):
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
