@@ -113,7 +113,7 @@ class Pipeline:
         tmp_ptr = self.tid_prefetch_ptr
         for tid in range(0,self.num_threads):
             tmp_ptr = (tmp_ptr + 1) % self.num_threads
-            valid = (self.fetch_unit[tmp_ptr].fetchQueue.len() <= 1) or\
+            valid = (self.fetch_unit[tmp_ptr].fetchQueue.len() <= 2) or\
                     ((not self.thread_unit[tmp_ptr].is_anomaly()) and (not self.fetch_unit[tmp_ptr].fetch_done))
             if valid:
                 self.tid_prefetch_ptr = (tmp_ptr-1) % self.num_threads
