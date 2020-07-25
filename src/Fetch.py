@@ -18,6 +18,7 @@ class Fetch:
             else FETCH_SIZE  # Max number of instructions to fetch from memory
         # PreFetch scheduling mechanism
         self.prefetch_ongoing = False
+        self.flush_ongoing = False
         self.prefetch_delay = int(params["PREFETCH_DELAY"]) if "PREFETCH_DELAY" in params.keys() \
             else PREFETCH_DELAY
         self.prefetch_cycle = 0
@@ -76,14 +77,17 @@ class Fetch:
     # Progress pre-fetching, checks if got pending fetch request, and the fetch delay is passed.
     def tick(self, cur_tick):
         if self.prefetch_ongoing and (self.prefetch_cycle + self.prefetch_delay <= cur_tick):
-            self.fetch()
-            self.set_anomaly()
+            if not self.flush_ongoing:
+                self.fetch()
+                self.set_anomaly()
+            self.flush_ongoing = False
             self.prefetch_ongoing = False
 
     # Change fetch status
     def set_prefetch(self, cur_tick):
         self.prefetch_ongoing = True
         self.prefetch_cycle = cur_tick
+        self.flush_ongoing = False
 
     # return if allowed to schedule for pre-fetching
     def check_prefetch(self):
@@ -91,7 +95,7 @@ class Fetch:
         if self.prefetch_ongoing or self.mem_done():
             return False
         # anomaly case
-        if self.anomaly_enabled and self.thread_unit.is_anomaly() and (self.fetchQueue.len() >= 2):
+        if self.anomaly_enabled and self.thread_unit.is_anomaly() and (self.fetchQueue.len() > 2):
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -111,13 +115,13 @@ class Fetch:
         return self.NextInstMemPtr >= self.MaxPtr
 
     def fetch_done(self):
-        return self.mem_done() and (not self.prefetch_ongoing) and (self.fetchQueue.len() <= 1)
+        return self.mem_done() and (not self.prefetch_ongoing)
 
     def flush(self, next_num):
         self.flushed_inst_count += self.fetchQueue.len()
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
-        self.prefetch_ongoing = False  # TODO - maybe wait for old ongoing fetch to be done?
+        self.flush_ongoing = True
 
     def report_statistics(self):
         print("Fetch TID={0} prefetch_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} " 

@@ -5,7 +5,8 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = True
+DEFAULT_EN_ANOMALY = False
+#DEFAULT_EN_ANOMALY = False
 
 # Simulation ARGS
 NUM_THREADS = 4
@@ -18,7 +19,7 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 PTRMAX = None # no limit
-#PTRMAX = 1200
+#PTRMAX = 20
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
