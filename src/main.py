@@ -28,7 +28,7 @@ def run_rgr():
     report_writer = csv.writer(csv_file)
 
     rgr_db = RegressionPermutation(RGR)
-    report_writer.writerow(rgr_db.key_list + ["IPC", "INSTS", "TICKS","Insts Flushed Ex","Total Flushed Insts"])
+    report_writer.writerow(rgr_db.key_list + ["IPC", "INSTS", "TICKS","Flushed Ex","Flushed Insts","# of Flushes","Mem Accesses"])
     for perm_list in rgr_db.perm_list_of_lists:
         params_dict = dict()
         params_list = list()
@@ -37,7 +37,6 @@ def run_rgr():
             params_dict[key] = val
             params_list.append(val)
         print(params_list)
-        params_dict = update_pipeline_params(params_dict) #update with attributes from user input
         x = RunModel(mem_params, params_dict)
         x.simulator()
         params_list.append("{0:.3f}".format(x.pipeline.ipc))
@@ -45,20 +44,17 @@ def run_rgr():
         params_list.append(x.pipeline.last_tick)
         params_list.append(x.pipeline.execute_unit.count_flushed_inst)
         params_list.append(x.pipeline.count_flushed_inst)
+        params_list.append(x.pipeline.execute_unit.num_of_flushes)
+        params_list.append(x.pipeline.total_num_of_mem_access)
 
         report_writer.writerow(params_list)
         del x, params_dict, params_list
 
     csv_file.close()
 
-def update_pipeline_params(params_dict : dict):
-    params_dict['en_anomaly'] = args_params["en_anomaly"]
-    return params_dict
-
 def run_single():
     mem_params = mem_params_from_args()
     params_dict = dict()
-    params_dict = update_pipeline_params(params_dict)  # update with attributes from user input
     x = RunModel(mem_params,params_dict)
     x.simulator()
     x.report_statistics()
@@ -87,7 +83,6 @@ def print_help():
     print("single         True/False             Running simple simulation of single run of default parameters")
     print("reg            True/False             Running regression simulation from configuration file of parameters")
     print("verbose        True/False             Pipeline verbosity")
-    print("en_anomaly     True/False             Anomaly column - Enabled")
 
 def print_params():
     for key,val in args_params.items():
@@ -104,7 +99,6 @@ if __name__ == '__main__':
     args_params["csv_output"] = False
     args_params["dir"] = SIMULATION_FILE
     args_params["ptrMax"] = PTRMAX
-    args_params["en_anomaly"] = DEFAULT_EN_ANOMALY
 
     for arg in sys.argv[1:]:
         if arg.startswith("dir="):
@@ -121,8 +115,6 @@ if __name__ == '__main__':
             args_params["csv_output"] = bool_arg_parsing(arg.split("=")[1])
         elif arg.startswith("ptrMax="):
             args_params["ptrMax"] = int(arg.split("=")[1])
-        elif arg.startswith("en_anomaly="):
-            args_params["en_anomaly"] = bool_arg_parsing(arg.split("=")[1])
 
     print_params()
 

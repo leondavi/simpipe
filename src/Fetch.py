@@ -26,8 +26,9 @@ class Fetch:
         self.prefetch_inst_count = 0
         self.flushed_inst_count = 0
         self.dummy_inst_count = 0
-        self.anomaly_enabled = params['en_anomaly']
+        self.anomaly_enabled =  params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
         self.thread_unit = None
+        self.num_of_mem_access = 0
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -85,6 +86,7 @@ class Fetch:
 
     # Change fetch status
     def set_prefetch(self, cur_tick):
+        self.num_of_mem_access += 1
         self.prefetch_ongoing = True
         self.prefetch_cycle = cur_tick
         self.flush_ongoing = False

@@ -14,6 +14,7 @@ class Execute:
         self.committed_inst = Instruction()
         self.count_flushed_inst = 0
         self.count_committed_inst = 0
+        self.num_of_flushes = 0
         # Resources
         # TODO-?
         # Pointer to relevant units units
@@ -21,7 +22,7 @@ class Execute:
         self.issue_unit = None
         self.fetch_unit = None
         # Anomaly
-        self.anomaly_enabled = params['en_anomaly']
+        self.anomaly_enabled = params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
 
     # Update the information inside the execute
     def tick(self, cur_tick):
@@ -49,6 +50,7 @@ class Execute:
 
     # Clear thread from the pipeline
     def flush(self):
+        self.num_of_flushes += 1
         tid = self.committed_inst.tid
         next_inst_num = self.committed_inst.num + 1
         for i in range(0, self.stages.size-1):

@@ -17,7 +17,7 @@ class Issue:
         self.fetch_unit = None
         self.execute_unit = None
         #anomaly
-        self.anomaly_enabled = params['en_anomaly']
+        self.anomaly_enabled = params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
 
     # Tick issue state
     # Check if there exists an instruction in issue, if the instruction can be executed push it

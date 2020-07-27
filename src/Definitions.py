@@ -19,7 +19,7 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 PTRMAX = None # no limit
-#PTRMAX = 20
+PTRMAX = 20
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
@@ -45,10 +45,12 @@ issue_policy_list = ["RR", "RR_ANOMALY_PERSISTENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4, 5]
 prefetch_delay_list = [2,3,4]
+prefetch_policy_list = ["RR","RR_ANOMALY"]
+anomaly_en_list = [True,False]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
-       ["PREFETCH_DELAY", prefetch_delay_list]]
+       ["PREFETCH_DELAY", prefetch_delay_list],["PREFETCH_POLICY",prefetch_policy_list],["EN_ANOMALY",anomaly_en_list]]
 
 FAST_RGR = [["NUM_THREAD", [2]], ["ISSUE_POLICY", ["RR"]], ["SPECULATIVE", [False]],
             ["NUM_STAGES", [4]], ["PREFETCH_DELAY", [3]]]

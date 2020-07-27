@@ -26,6 +26,7 @@ class Pipeline:
         self.last_tick = 0
         self.count_flushed_inst = 0
         self.ipc = 0
+        self.total_num_of_mem_access = 0
 
     # Connect between the class's
     def connect(self):
@@ -144,6 +145,8 @@ class Pipeline:
 
         self.count_flushed_inst = self.issue_unit.count_flushed_inst + self.execute_unit.count_flushed_inst +\
             sum([self.fetch_unit[idx].flushed_inst_count for idx in range(0, self.num_threads)])
+
+        self.total_num_of_mem_access =  sum([self.fetch_unit[idx].num_of_mem_access for idx in range(0, self.num_threads)])
 
     def report_model(self):
         for tid_idx in range(0, self.num_threads):
