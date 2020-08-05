@@ -68,7 +68,7 @@ class Execute:
         if (numOfFlushedInStages > 0) or (numOfFlushedInIssue > 0): #flush of pipeline case
             self.num_of_flushes += 1
             if self.thread_unit[tid].is_anomaly("Execute"):
-                self.self.num_of_successfully_brtk_predicted += 1
+                self.num_of_successfully_brtk_predicted += 1
 
         if self.anomaly_enabled:
             self.thread_unit[tid].set_anomaly(False, "Execute")
