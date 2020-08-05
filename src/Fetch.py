@@ -120,10 +120,12 @@ class Fetch:
         return self.mem_done() and (not self.prefetch_ongoing)
 
     def flush(self, next_num):
+        numOfInst_to_flush = self.fetchQueue.len()
         self.flushed_inst_count += self.fetchQueue.len()
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
         self.flush_ongoing = True
+        return numOfInst_to_flush
 
     def report_statistics(self):
         print("Fetch TID={0} prefetch_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} " 

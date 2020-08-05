@@ -5,11 +5,11 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = False
+DEFAULT_EN_ANOMALY = True
 #DEFAULT_EN_ANOMALY = False
 
 # Simulation ARGS
-NUM_THREADS = 4
+NUM_THREADS = 2
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
 ISSUE_POLICY = "RR_ANOMALY_PERSISTENT" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
@@ -19,10 +19,10 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 PTRMAX = None # no limit
-PTRMAX = 20
+PTRMAX = 30
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
-#VERB = "DEBUG"  # [0,1,2]
+VERB = "NORM"  # [0,1,2]
 
 
 def pprint(msg, verb="DEBUG"):
@@ -35,7 +35,7 @@ IQ_SIZE = 8  # Instruction Queue(IQ) size
 PREFETCH_DELAY = 4  # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
-HAZARD_MEM_DELAY = 1
+HAZARD_MEM_DELAY = 2
 HAZARD_MULDIV_DELAY = 3
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 

@@ -157,6 +157,6 @@ class Pipeline:
             self.num_threads, self.execute_unit.num_stages))
 
     def report_statistics(self):
-        msg = "Inst Committed {0} ipc {1:.3f} flushed {2}".format(
-            self.execute_unit.count_committed_inst, self.ipc, self.count_flushed_inst)
+        msg = "Inst Committed {0} ipc {1:.3f} flushed {2} mem accesses {3}".format(
+            self.execute_unit.count_committed_inst, self.ipc, self.count_flushed_inst, self.total_num_of_mem_access)
         pprint(msg, "NONE")

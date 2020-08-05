@@ -50,17 +50,22 @@ class Execute:
 
     # Clear thread from the pipeline
     def flush(self):
-        self.num_of_flushes += 1
         tid = self.committed_inst.tid
         next_inst_num = self.committed_inst.num + 1
+        numOfFlushedInStages = 0
         for i in range(0, self.stages.size-1):
             if (not self.stages.q_list[i].empty_inst) and (self.stages.q_list[i].tid == tid):
                 self.count_flushed_inst += 1
+                numOfFlushedInStages += 1
                 self.stages.q_list[i].empty_inst = True
+
         # Clear other units
         self.thread_unit[tid].flush()
-        self.issue_unit.flush(tid)
+        numOfFlushedInIssue = self.issue_unit.flush(tid)
         self.fetch_unit[tid].flush(next_inst_num)
+
+        if numOfFlushedInStages > 0:
+            self.num_of_flushes += 1
 
         if self.anomaly_enabled:
             self.thread_unit[tid].set_anomaly(False, "Execute")
