@@ -28,7 +28,7 @@ def run_rgr():
     report_writer = csv.writer(csv_file)
 
     rgr_db = RegressionPermutation(RGR)
-    report_writer.writerow(rgr_db.key_list + ["IPC", "TICKS", "FlushedInstsWithFetch","NumOfFlushes","BRTK_PREDICTED_SUCCESSFULY","COMMITTED_INSTS","FLUSHED_INSTS","COUNT_OF_FETCHES"])
+    report_writer.writerow(rgr_db.key_list + ["IPC", "TICKS", "FlushedInstsWithFetchQueues","NumOfFlushes","COMMITTED_INSTS","FLUSHED_INSTS","COUNT_OF_FETCHES"])
     for perm_list in rgr_db.perm_list_of_lists:
         params_dict = dict()
         params_list = list()
@@ -43,7 +43,6 @@ def run_rgr():
         params_list.append(x.pipeline.last_tick) #TICKS
         params_list.append(x.pipeline.count_flushed_inst) #FlushedInstsWithFetch
         params_list.append(x.pipeline.execute_unit.num_of_flushes) #NumOfFlushes
-        params_list.append(x.pipeline.execute_unit.num_of_successfully_brtk_predicted) # BRTK_PREDICTED_SUCCESSFULY
         params_list.append(x.pipeline.execute_unit.count_committed_inst) #COMMITTED_INSTS
         params_list.append(x.pipeline.execute_unit.count_flushed_inst) #FLUSHED_INSTS
         params_list.append(x.pipeline.total_num_of_mem_access)#COUNT_OF_FETCHES
