@@ -66,7 +66,7 @@ class Issue:
         if fetch_list[self.issue_ptr]:
             self.issue_inst = self.fetch_unit[self.issue_ptr].fetchQueue.pop()
             self.issue_empty = False
-            if self.issue_inst.anomaly and self.anomaly_enabled and self.issue_inst.is_event():
+            if self.issue_inst.anomaly and self.anomaly_enabled and self.issue_inst.is_branch():
                 self.thread_unit[self.issue_ptr].set_anomaly(True,stage="Execute")
         else:  # Push empty inst
             self.issue_inst = Instruction.empty_inst(0)
@@ -88,6 +88,7 @@ class Issue:
         if not self.anomaly_enabled:
             return
 
+        next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
         if self.fetch_unit[self.issue_ptr].fetchQueue.len() > 0 and\
            self.thread_unit[self.issue_ptr].is_anomaly(stage="Fetch") and\
            not self.thread_unit[self.issue_ptr].is_anomaly(stage="Execute"):

@@ -42,6 +42,9 @@ class Instruction:
     def empty(self):
         return 1 if self.empty_inst else 0
 
+    def is_branch(self):
+        return self.inst_opcode in ["BRANCH"]
+
     def is_event(self):
         is_store = self.inst_opcode == "LOAD"
         is_branch = self.inst_opcode in ["JAL", "JALR", "BRANCH"]
