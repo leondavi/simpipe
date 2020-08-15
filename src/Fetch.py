@@ -34,7 +34,7 @@ class Fetch:
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
 
-    def fetch(self):
+    def fetch(self,cur_tick):
 
         # Check that the address is valid.
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
@@ -42,13 +42,11 @@ class Fetch:
 
         # First instruction must be pushed and update the pointers
         first_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
-        print(first_inst.str())
+        first_inst.start_tick = cur_tick
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
         self.prefetch_inst_count += 1
         self.branch_taken_in_queue |= first_inst.is_anomaly("Branch")
-        if first_inst.is_anomaly("Branch"):
-            print(first_inst.str())
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
 
@@ -62,15 +60,12 @@ class Fetch:
                 empty_inst = True
             else:
                 curr_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
-                print(curr_inst.str())
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != DEFAULT_INSTRUCTION_SIZE:
                     empty_inst = True
                 else:
                     self.branch_taken_in_queue |= curr_inst.is_anomaly("Branch")
-                    if curr_inst.is_anomaly("Branch"):
-                        print(curr_inst.str())
                     self.fetchQueue.push(curr_inst)
                     self.NextInstMemPtr += 1
                     self.prefetch_inst_count += 1
@@ -78,8 +73,13 @@ class Fetch:
 
             # None were pushed, create an empty instruction
             if empty_inst:
-                self.fetchQueue.push(Instruction.empty_inst(self.tid, "dummy", False))
+                dummy_inst = Instruction.empty_inst(self.tid, "dummy", False)
+                dummy_inst.pc = str(int(first_inst.pc)+4*(i+1))
+                self.fetchQueue.push(dummy_inst)
                 self.dummy_inst_count += 1
+
+            self.fetchQueue.back().start_tick = cur_tick
+
 
         return True
 
@@ -87,7 +87,7 @@ class Fetch:
     def tick(self, cur_tick):
         if self.prefetch_ongoing and (self.prefetch_cycle + self.prefetch_delay <= cur_tick):
             if not self.flush_ongoing:
-                self.fetch()
+                self.fetch(cur_tick)
             self.flush_ongoing = False
             self.prefetch_ongoing = False
 

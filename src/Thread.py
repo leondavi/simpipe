@@ -4,9 +4,10 @@ from Instruction import *
 # This class is used to mange thread depends and track the status of the register
 class Thread:
     # arg
-    def __init__(self, tid, num_stages):
+    def __init__(self, tid, params=dict()):
         self.tid = tid
-        self.num_stages = num_stages  # Max latency till got the result
+        self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
+        self.forward_en = int(params["FORWARD_EN"]) if "FORWARD_EN" in params.keys() else FORWARD_EN
         # Used as
         self.ready_registers = [0 for _ in range(0, REGISTER_NUM)]  # TODO -?
         self.ready = 0
@@ -23,9 +24,9 @@ class Thread:
         if inst.inst_opcode in ["JAL", "JALR", "BRANCH"]:
             self.ready = tick + (not speculative) * (self.num_stages - 1)
         if inst.inst_opcode == "LOAD":
-            self.ready = tick + HAZARD_MEM_DELAY
+            self.ready = tick + ( HAZARD_MEM_DELAY if self.forward_en else (self.num_stages - 1))
         if (inst.inst_opcode in MULDIV.values()) or (inst.inst_opcode in MULDIV64.values()):
-            self.ready = tick + HAZARD_MULDIV_DELAY
+            self.ready = tick + (HAZARD_MULDIV_DELAY if self.forward_en else (self.num_stages - 1))
 
 
     # Clear any latency a register got

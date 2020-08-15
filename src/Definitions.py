@@ -13,16 +13,19 @@ SPECULATIVE = True  # [True, False] # True - keep push instructions without know
 ISSUE_POLICY = "RR" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR"
 PREFETCH_AE = False
+#PREFETCH_AE = False
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 PTRMAX = None # no limit
-PTRMAX = 300
+#PTRMAX = 300
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
-VERB = "DEBUG"  # [0,1,2]
+#VERB = "DEBUG"  # [0,1,2]
 
+EX_DUMP_TO_CSV = True
+EX_DUMP_CSV_PATH = "appname.csv"
 
 def pprint(msg, verb="DEBUG"):
     if VERB_LVL[verb] <= VERB_LVL[VERB]:
@@ -36,20 +39,24 @@ FETCH_SIZE = 4  # Default number of instructions
 
 HAZARD_MEM_DELAY = 2
 HAZARD_MULDIV_DELAY = 3
+FORWARD_EN = False # [True, False]  # False- forward in from 2 places, single cycle inst or commit
+
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
 num_thread_list = [1, 2, 4]
 issue_policy_list = ["RR","EVENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
-num_stages_list = [4, 5]
+num_stages_list = [3, 4, 5]
 prefetch_delay_list = [2,3,4]
 prefetch_policy_list = ["RR"]
 prefetch_ae_list = [True,False]
+forward_en_list = [True,False]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
-       ["PREFETCH_DELAY", prefetch_delay_list],["PREFETCH_POLICY",prefetch_policy_list],["PREFETCH_AE",prefetch_ae_list]]
+       ["PREFETCH_DELAY", prefetch_delay_list], ["PREFETCH_POLICY",prefetch_policy_list],
+       ["PREFETCH_AE",prefetch_ae_list], ["FORWARD_EN",forward_en_list]]
 
 FAST_RGR = [["NUM_THREAD", [2]], ["ISSUE_POLICY", ["RR"]], ["SPECULATIVE", [False]],
             ["NUM_STAGES", [4]], ["PREFETCH_DELAY", [3]]]

@@ -1,5 +1,6 @@
 from Instruction import *
 from FIFOQueue import *
+import csv
 
 
 # Used as a stage In the pipeline
@@ -22,11 +23,34 @@ class Execute:
         self.issue_unit = None
         self.fetch_unit = None
 
+        self.generate_csv()
+
+    def generate_csv(self):
+        if EX_DUMP_TO_CSV:
+            with open(EX_DUMP_CSV_PATH,'w',newline='') as csv_file:
+                report_writer = csv.writer(csv_file)
+                if EX_DUMP_TO_CSV:
+                    empty = Instruction()
+                    header = empty.csv_list(header=True)
+                    report_writer.writerow(header)
+                
+    def dump_to_csv(self,inst):
+        if EX_DUMP_TO_CSV:
+            if not inst.empty_inst:
+                with open(EX_DUMP_CSV_PATH,'a',newline='') as csv_file:
+                    report_writer = csv.writer(csv_file)
+                    report_writer.writerow(inst.csv_list())
+
+
     # Update the information inside the execute
     def tick(self, cur_tick):
         # Save the Instruction that is committing
         self.committed_inst = self.stages.front()
         self.count_committed_inst += not self.committed_inst.empty_inst
+        self.committed_inst.end_tick = cur_tick
+
+        self.dump_to_csv(self.committed_inst) # only if EX_DUMP_TO_CSV is True
+
         tid = self.committed_inst.tid
         if self.committed_inst.is_anomaly("Branch"):
             self.fetch_unit[tid].branch_taken_in_queue = False
