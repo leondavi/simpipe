@@ -15,7 +15,6 @@ class Execute:
         self.count_flushed_inst = 0
         self.count_committed_inst = 0
         self.num_of_flushes = 0
-        self.num_of_successfully_brtk_predicted = 0
         # Resources
         # TODO-?
         # Pointer to relevant units units
@@ -47,28 +46,25 @@ class Execute:
         self.thread_unit[tid].set_anomaly(False,"Fetch")
         self.fetch_unit[tid].set_anomaly()
 
-
-
     # Clear thread from the pipeline
     def flush(self):
         tid = self.committed_inst.tid
         next_inst_num = self.committed_inst.num + 1
-        numOfFlushedInStages = 0
+
+        is_flushed_inst = False
         for i in range(0, self.stages.size-1):
             if (not self.stages.q_list[i].empty_inst) and (self.stages.q_list[i].tid == tid):
+                is_flushed_inst = True
                 self.count_flushed_inst += 1
-                numOfFlushedInStages += 1
                 self.stages.q_list[i].empty_inst = True
 
         # Clear other units
         self.thread_unit[tid].flush()
-        numOfFlushedInIssue = self.issue_unit.flush(tid)
+        is_flushed_inst = is_flushed_inst or self.issue_unit.flush(tid)
         self.fetch_unit[tid].flush(next_inst_num) #in fetch we don't do pipeline flush - we just change pointer reference since it is a queue
 
-        if (numOfFlushedInStages > 0) or (numOfFlushedInIssue > 0): #flush of pipeline case
+        if is_flushed_inst:
             self.num_of_flushes += 1
-            if self.thread_unit[tid].is_anomaly("Execute"):
-                self.num_of_successfully_brtk_predicted += 1
 
         if self.anomaly_enabled:
             self.thread_unit[tid].set_anomaly(False, "Execute")
