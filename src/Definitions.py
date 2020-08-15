@@ -24,7 +24,7 @@ VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
 
-EX_DUMP_TO_CSV = True
+EX_DUMP_TO_CSV = False
 EX_DUMP_CSV_PATH = "appname.csv"
 
 def pprint(msg, verb="DEBUG"):

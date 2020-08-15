@@ -7,7 +7,7 @@ class Thread:
     def __init__(self, tid, params=dict()):
         self.tid = tid
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
-        self.forward_en = int(params["FORWARD_EN"]) if "FORWARD_EN" in params.keys() else FORWARD_EN
+        self.forward_en =  params["FORWARD_EN"] == "True" if "FORWARD_EN" in params.keys() else FORWARD_EN
         # Used as
         self.ready_registers = [0 for _ in range(0, REGISTER_NUM)]  # TODO -?
         self.ready = 0
