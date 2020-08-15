@@ -82,7 +82,7 @@ class Pipeline:
         fetch_sts = [str(self.fetch_unit[i].fetchQueue.len()) for i in range(0, self.num_threads)]
         issue_sts = self.issue_unit.get_status()
         execute_sts = self.execute_unit.get_status()
-        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+",af-"+str(int(self.thread_unit[i].anomaly_in_fetch))+",ae-"+str(int(self.thread_unit[i].anomaly_in_execute)) for i in range(0, self.num_threads)]
+        thread_sts = [" t"+str(i)+": "+str(self.thread_unit[i].ready)+",af-"+str(int(self.fetch_unit[i].branch_taken_in_queue)) for i in range(0, self.num_threads)]
         msg = "{0:<5},{1:^5},{2},{3:^15}, {4:^35} \t, {5}".format(
             cur_tick, prefetch_id, ",".join(fetch_sts), issue_sts, execute_sts, ",".join(thread_sts))
         pprint(msg, "NORM")
@@ -100,25 +100,8 @@ class Pipeline:
 
     # --------------- Policies ---------------#
     def update_prefetch_policy(self):
-        if self.prefetch_policy == "RR_ANOMALY":
-            self.round_robin_anomaly_policy()
-        elif self.prefetch_policy == "RR":
+        if self.prefetch_policy == "RR":
             pass
-
-    def round_robin_anomaly_policy(self):
-        ''':arg
-         finds an empty fetch queue that is not in an anomaly state
-         and set it to next fetch if no anomaly
-        '''
-
-        tmp_ptr = self.tid_prefetch_ptr
-        for tid in range(0,self.num_threads):
-            tmp_ptr = (tmp_ptr + 1) % self.num_threads
-            valid = (self.fetch_unit[tmp_ptr].fetchQueue.len() <= 2) or\
-                    ((not self.thread_unit[tmp_ptr].is_anomaly()) and (not self.fetch_unit[tmp_ptr].fetch_done))
-            if valid:
-                self.tid_prefetch_ptr = (tmp_ptr-1) % self.num_threads
-                return
 
     # Check if all units are done
     def check_done(self):

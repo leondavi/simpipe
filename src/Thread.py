@@ -12,10 +12,6 @@ class Thread:
         self.ready = 0
         # statistics
 
-        # anomaly
-        self.anomaly_in_fetch = False
-        self.anomaly_in_execute = False
-
     # Return True if command won't be able to execute
     # TODO - can be more sophisticate
     def got_dependency(self, inst, tick):
@@ -35,17 +31,3 @@ class Thread:
     # Clear any latency a register got
     def flush(self):
         self.ready_registers = [0 for _ in range(0, REGISTER_NUM)]
-
-
-    def set_anomaly(self,val = True,stage = "Fetch"):
-        if stage == "Fetch":
-            self.anomaly_in_fetch = val
-        elif stage == "Execute":
-            self.anomaly_in_execute = val
-
-
-    def is_anomaly(self,stage = "Fetch"):
-        if stage == "Fetch":
-            return self.anomaly_in_fetch
-        elif stage == "Execute":
-            return self.anomaly_in_execute

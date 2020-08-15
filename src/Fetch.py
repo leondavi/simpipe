@@ -26,9 +26,10 @@ class Fetch:
         self.prefetch_inst_count = 0
         self.flushed_inst_count = 0
         self.dummy_inst_count = 0
-        self.anomaly_enabled =  params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
+        self.prefetch_ae =  params["PREFETCH_AE"] == "True" if "PREFETCH_AE" in params.keys() else PREFETCH_AE
         self.thread_unit = None
         self.num_of_mem_access = 0
+        self.branch_taken_in_queue = False
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -41,10 +42,13 @@ class Fetch:
 
         # First instruction must be pushed and update the pointers
         first_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
+        print(first_inst.str())
         self.fetchQueue.push(first_inst)
         self.NextInstMemPtr += 1
         self.prefetch_inst_count += 1
-
+        self.branch_taken_in_queue |= first_inst.is_anomaly("Branch")
+        if first_inst.is_anomaly("Branch"):
+            print(first_inst.str())
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
 
@@ -58,11 +62,15 @@ class Fetch:
                 empty_inst = True
             else:
                 curr_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
+                print(curr_inst.str())
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # Check that next instruction is sequential in memory
                 if delta_pc != DEFAULT_INSTRUCTION_SIZE:
                     empty_inst = True
                 else:
+                    self.branch_taken_in_queue |= curr_inst.is_anomaly("Branch")
+                    if curr_inst.is_anomaly("Branch"):
+                        print(curr_inst.str())
                     self.fetchQueue.push(curr_inst)
                     self.NextInstMemPtr += 1
                     self.prefetch_inst_count += 1
@@ -80,7 +88,6 @@ class Fetch:
         if self.prefetch_ongoing and (self.prefetch_cycle + self.prefetch_delay <= cur_tick):
             if not self.flush_ongoing:
                 self.fetch()
-                self.set_anomaly()
             self.flush_ongoing = False
             self.prefetch_ongoing = False
 
@@ -97,7 +104,7 @@ class Fetch:
         if self.prefetch_ongoing or self.mem_done():
             return False
         # anomaly case
-        if self.anomaly_enabled and self.thread_unit.is_anomaly() and (self.fetchQueue.len() > 2):
+        if self.prefetch_ae and self.branch_taken_in_queue:
             return False
         # Make sure in case schedule that got space for store all received instructions
         return self.fetchQueue.space() >= self.fetch_size
@@ -125,6 +132,7 @@ class Fetch:
         self.fetchQueue.flush()
         self.NextInstMemPtr = next_num
         self.flush_ongoing = True
+        self.branch_taken_in_queue = False
         return numOfInst_to_flush
 
     def report_statistics(self):
@@ -132,22 +140,3 @@ class Fetch:
               "mem_delay={5} next_ptr={6}".format(self.tid, self.prefetch_inst_count, self.dummy_inst_count,
                                                   self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
                                                   self.NextInstMemPtr))
-
-    # anomaly functions
-    def set_anomaly(self) -> None:
-        if not self.anomaly_enabled:
-            return
-
-        if self.check_for_anomaly_in_Queue():
-            self.thread_unit.set_anomaly(True)
-
-
-
-    def check_for_anomaly_in_Queue(self):
-        if self.fetchQueue.len() == 0:
-            return False
-
-        for i in range(0,int(self.fetchQueue.len())):
-            if self.fetchQueue.at(i).anomaly:
-                return True
-        return False

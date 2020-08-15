@@ -21,30 +21,18 @@ class Execute:
         self.thread_unit = None
         self.issue_unit = None
         self.fetch_unit = None
-        # Anomaly
-        self.anomaly_enabled = params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
 
     # Update the information inside the execute
     def tick(self, cur_tick):
         # Save the Instruction that is committing
         self.committed_inst = self.stages.front()
         self.count_committed_inst += not self.committed_inst.empty_inst
-        self.update_anomaly()
-
+        tid = self.committed_inst.tid
+        if self.committed_inst.is_anomaly("Branch"):
+            self.fetch_unit[tid].branch_taken_in_queue = False
 
         if (not self.committed_inst.empty_inst) and (self.committed_inst.br_taken == 1):
             self.flush()
-
-    def update_anomaly(self):
-        if not self.anomaly_enabled:
-            return
-        if not self.committed_inst.anomaly:
-            return
-
-        tid = self.committed_inst.tid
-        self.thread_unit[tid].set_anomaly(False,"Execute")
-        self.thread_unit[tid].set_anomaly(False,"Fetch")
-        self.fetch_unit[tid].set_anomaly()
 
     # Clear thread from the pipeline
     def flush(self):
@@ -65,10 +53,6 @@ class Execute:
 
         if is_flushed_inst:
             self.num_of_flushes += 1
-
-        if self.anomaly_enabled:
-            self.thread_unit[tid].set_anomaly(False, "Execute")
-            self.thread_unit[tid].set_anomaly(False, "Fetch")
 
     def done(self):
         return all([self.stages.q_list[i].empty_inst for i in range(0, self.stages.size)])

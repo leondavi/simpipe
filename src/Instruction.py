@@ -148,3 +148,6 @@ class Instruction:
 
     def delta_pc(self, inst):
         return abs(int(self.pc) - int(inst.pc))
+
+    def is_anomaly(self,type = "Branch"):
+        return self.anomaly == 1

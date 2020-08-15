@@ -5,24 +5,23 @@ VERSION = "1.0"
 # SIMULATION_FILE = "../data/dummy.csv"
 SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
-DEFAULT_EN_ANOMALY = False
-#DEFAULT_EN_ANOMALY = False
 
 # Simulation ARGS
 NUM_THREADS = 1
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = "RR_ANOMALY_PERSISTENT" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
-PREFETCH_POLICY = "RR_ANOMALY"  #["RR_ANOMALY","RR"]  # ["RR","RR_ANOMALY"]
+ISSUE_POLICY = "RR" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+PREFETCH_POLICY = "RR"
+PREFETCH_AE = False
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 # PTRMAX = 6300000
 PTRMAX = None # no limit
-#PTRMAX = 30
+PTRMAX = 300
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
-#VERB = "DEBUG"  # [0,1,2]
+VERB = "DEBUG"  # [0,1,2]
 
 
 def pprint(msg, verb="DEBUG"):
@@ -40,17 +39,17 @@ HAZARD_MULDIV_DELAY = 3
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
-num_thread_list = [1, 2, 4, 8]
-issue_policy_list = ["RR", "RR_ANOMALY_PERSISTENT"]  # ["RR", "COARSE", "EVENT"]
+num_thread_list = [1, 2, 4]
+issue_policy_list = ["RR","EVENT"]  # ["RR", "COARSE", "EVENT"]
 speculative_list = [False, True]
 num_stages_list = [4, 5]
 prefetch_delay_list = [2,3,4]
-prefetch_policy_list = ["RR","RR_ANOMALY"]
-anomaly_en_list = [True,False]
+prefetch_policy_list = ["RR"]
+prefetch_ae_list = [True,False]
 
 RGR = [["NUM_THREAD", num_thread_list], ["ISSUE_POLICY", issue_policy_list],
        ["SPECULATIVE", speculative_list], ["NUM_STAGES", num_stages_list],
-       ["PREFETCH_DELAY", prefetch_delay_list],["PREFETCH_POLICY",prefetch_policy_list],["EN_ANOMALY",anomaly_en_list]]
+       ["PREFETCH_DELAY", prefetch_delay_list],["PREFETCH_POLICY",prefetch_policy_list],["PREFETCH_AE",prefetch_ae_list]]
 
 FAST_RGR = [["NUM_THREAD", [2]], ["ISSUE_POLICY", ["RR"]], ["SPECULATIVE", [False]],
             ["NUM_STAGES", [4]], ["PREFETCH_DELAY", [3]]]
