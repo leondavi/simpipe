@@ -77,6 +77,8 @@ class Issue:
             self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
         elif self.issue_policy == "RR":
             pass
+        elif self.issue_policy == "EVENT_AE":
+            self.event_ae_policy(cur_tick)
 
     # Event - next instruction
     def event_policy(self, cur_tick):
@@ -85,6 +87,15 @@ class Issue:
             # check if next cycle the instruction will pass Issue
             if next_inst.is_event() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
                 self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+
+    # Event AE - next instruction
+    def event_ae_policy(self, cur_tick):
+        if self.fetch_unit[self.issue_ptr].fetchQueue.len() != 0:
+            next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
+            # check if next cycle the instruction will pass Issue
+            if self.fetch_unit[self.issue_ptr].get_ae_in_queue() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
+                self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+
 
     def report_model(self):
         print("Issue Thread_num={0} Issue_policy={1} speculative={2} flushed={3}"

@@ -140,3 +140,6 @@ class Fetch:
               "mem_delay={5} next_ptr={6}".format(self.tid, self.prefetch_inst_count, self.dummy_inst_count,
                                                   self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
                                                   self.NextInstMemPtr))
+
+    def get_ae_in_queue(self):
+        return self.branch_taken_in_queue and (not self.fetchQueue.empty())

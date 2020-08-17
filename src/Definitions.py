@@ -7,12 +7,12 @@ SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
 
 # Simulation ARGS
-NUM_THREADS = 1
+NUM_THREADS = 2
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = "RR" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+ISSUE_POLICY = "EVENT" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR"
-PREFETCH_AE = False
+PREFETCH_AE = True
 #PREFETCH_AE = False
 # Control args
 VERB_ON = False
@@ -45,7 +45,7 @@ MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 
 # generate permutations
 num_thread_list = [1, 2, 4]
-issue_policy_list = ["RR","EVENT"]  # ["RR", "COARSE", "EVENT"]
+issue_policy_list = ["RR", "COARSE", "EVENT","EVENT_AE"]
 speculative_list = [False, True]
 num_stages_list = [3, 4, 5]
 prefetch_delay_list = [2,3,4]

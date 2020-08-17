@@ -1,6 +1,6 @@
 from Pipeline import Pipeline
 from Memory import Memory
-
+from Definitions import *
 
 # This class creates and run the Pipeline model
 # Receive two parameters dictionary memory and pipeline
@@ -9,10 +9,16 @@ from Memory import Memory
 class RunModel:
 
     def __init__(self, mem_params: dict, pipeline_params=dict()):
+        self.pipeline_params = pipeline_params
         self.memory = Memory(mem_params)
         self.pipeline = Pipeline(self.memory, pipeline_params)
 
     def simulator(self):
+        params = self.pipeline_params
+        prefetch_ae =  params["PREFETCH_AE"] == "True" if "PREFETCH_AE" in params.keys() else PREFETCH_AE
+        issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
+        if (prefetch_ae==False) and (issue_policy=="EVENT_AE"):
+            return
         cur_tick = 0
         while self.pipeline.tick(cur_tick):
             cur_tick += 1
