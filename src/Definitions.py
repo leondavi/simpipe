@@ -17,8 +17,8 @@ PREFETCH_AE = True
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
-# PTRMAX = 6300000
-PTRMAX = None # no limit
+PTRMAX = 10000000
+#PTRMAX = None # no limit
 #PTRMAX = 300
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
