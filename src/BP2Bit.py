@@ -33,16 +33,6 @@ class BPTable:
         return len(self.pc_set)
 
 
-bp_table = BPTable(4)
-
-bp_table.add_data(10,None)
-bp_table.add_data(14,None)
-bp_table.add_data(18,None)
-bp_table.add_data(22,None)
-bp_table.add_data(10,None)
-bp_table.add_data(14,None)
-
-
 '''
 ---------------------> taken 
 0 - Strongly not taken ---> 1 - Weakly not taken ---> 2 Weakly taken ---> 3 Strongly taken
