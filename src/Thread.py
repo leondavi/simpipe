@@ -22,8 +22,12 @@ class Thread:
     # Update the register with dependence
     def set_dependency(self, inst, tick, speculative):
         # In case no RD or  the target is R0 no dependency update required
-        if inst.inst_opcode in ["JAL", "JALR", "BRANCH"] and (self.issue_policy != "EVENT_AE"):
-            self.ready = tick + (not speculative) * (self.num_stages - 1)
+        if inst.inst_opcode in ["JAL", "JALR", "BRANCH"] :
+            if  self.issue_policy == "EVENT_AE" :
+                if inst.is_anomaly():
+                    self.ready = tick + (not speculative) * (self.num_stages - 1)
+            else:
+                self.ready = tick + (not speculative) * (self.num_stages - 1)
         if inst.inst_opcode == "LOAD":
             self.ready = tick + ( HAZARD_MEM_DELAY if self.forward_en else (self.num_stages - 1))
         if (inst.inst_opcode in MULDIV.values()) or (inst.inst_opcode in MULDIV64.values()):

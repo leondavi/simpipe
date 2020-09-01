@@ -144,6 +144,7 @@ class Instruction:
         new_inst.m_inst = "{0:032b}".format(int(csv_row[csv_keys["m_inst"]]))[::-1]
         new_inst.m_inst_hex = csv_row[csv_keys["m_inst"]]
         new_inst.anomaly = int(csv_row[csv_keys['anomaly']] if 'anomaly' in csv_keys else False)
+        #new_inst.anomaly = new_inst.br_taken # 100% accuracy
         new_inst.inst_grp = int(csv_row[csv_keys["inst_grp"]])
         # The trace not indicate on taken branches
         if (new_inst.inst_name == "jal") or (new_inst.inst_name == "jalr"):
