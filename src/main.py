@@ -12,7 +12,7 @@ from datetime import datetime
 # Running the regression list
 def run_rgr():
     now = datetime.now()
-    res_filename = "results_"+now.strftime("%m-%d-%Y-%H_%M_%S")+".csv"
+    res_filename = EXP_PREFIX+"_"+"results_"+now.strftime("%m-%d-%Y-%H_%M_%S")+".csv"
     mem_params = mem_params_from_args()
 
     # Extract path to where write the results of regression

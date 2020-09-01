@@ -31,6 +31,7 @@ def pprint(msg, verb="DEBUG"):
     if VERB_LVL[verb] <= VERB_LVL[VERB]:
         print(msg)
 
+EXP_PREFIX = ''
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
