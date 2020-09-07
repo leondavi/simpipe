@@ -55,6 +55,9 @@ class Execute:
         if self.committed_inst.is_anomaly("Branch"):
             self.fetch_unit[tid].branch_taken_in_queue = False
 
+        if self.committed_inst.is_anomaly("Load"):
+            self.fetch_unit[tid].load_in_queue = False
+
         if (not self.committed_inst.empty_inst) and (self.committed_inst.br_taken == 1):
             self.flush()
 

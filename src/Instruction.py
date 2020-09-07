@@ -162,4 +162,8 @@ class Instruction:
         return abs(int(self.pc) - int(inst.pc))
 
     def is_anomaly(self,type = "Branch"):
-        return self.anomaly == 1
+        if type == "Branch":
+            return  self.anomaly == 1
+        if type == "Load":
+            return self.anomaly == 2
+        return None
