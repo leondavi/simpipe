@@ -56,8 +56,27 @@ class Issue:
         else:
             self.execute_unit.push(Instruction.empty_inst(0))
 
+    def get_fetch_list(self,cur_tick):
+        thread_dependency_list = [self.thread_unit[tid].got_dependency("", cur_tick+1) for tid in range(0, self.num_threads)]
+        fetch_queues_len_list = [(self.fetch_unit[tid].fetchQueue.len()  > 0) for tid in range(0, self.num_threads)]
+        combined_fetch_list = [fetch_queues_len_list[tid] and (not thread_dependency_list[tid]) for tid in range(0, self.num_threads)]
+
+        if sum(fetch_queues_len_list) == 1:
+            return fetch_queues_len_list
+
+        if self.issue_policy == "EVENT":
+            return combined_fetch_list
+        elif self.issue_policy == "EVENT_AE":
+            return combined_fetch_list
+        elif self.issue_policy == "COARSE":
+            pass
+        elif self.issue_policy == "RR":
+            pass
+
+        return fetch_queues_len_list
+
     def schedule_inst(self, cur_tick):
-        fetch_list = [self.fetch_unit[tid].fetchQueue.len() and (not self.thread_unit[tid].got_dependency("",cur_tick)) for tid in range(0, self.num_threads)]
+        fetch_list = self.get_fetch_list(cur_tick)
         self.update_policy(cur_tick)
         self.issue_ptr = round_robin(self.issue_ptr, fetch_list, self.num_threads)
 
@@ -73,12 +92,18 @@ class Issue:
     def update_policy(self, cur_tick):
         if self.issue_policy == "EVENT":
             self.event_policy(cur_tick)
-        elif self.issue_policy == "COARSE":
-            self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
-        elif self.issue_policy == "RR":
-            pass
         elif self.issue_policy == "EVENT_AE":
             self.event_ae_policy(cur_tick)
+        elif self.issue_policy == "COARSE":
+            self.coarse_policy(cur_tick)
+        elif self.issue_policy == "RR":
+            pass
+
+    def coarse_policy(self,cur_tick):
+        if not self.issue_empty:
+            if self.issue_inst.is_event():
+                return
+        self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
     # Event - next instruction
     def event_policy(self, cur_tick):
@@ -86,7 +111,7 @@ class Issue:
             next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
             # check if next cycle the instruction will pass Issue
             if next_inst.is_event() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
-                self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+                self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
     # Event AE - next instruction
     def event_ae_policy(self, cur_tick):
@@ -94,7 +119,7 @@ class Issue:
             next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
             # check if next cycle the instruction will pass Issue
             if self.fetch_unit[self.issue_ptr].get_ae_in_queue() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
-                self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+                self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
 
     def report_model(self):
