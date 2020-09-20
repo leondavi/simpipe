@@ -57,7 +57,7 @@ class Issue:
             self.execute_unit.push(Instruction.empty_inst(0))
 
     def schedule_inst(self, cur_tick):
-        fetch_list = [self.fetch_unit[tid].fetchQueue.len() for tid in range(0, self.num_threads)]
+        fetch_list = [self.fetch_unit[tid].fetchQueue.len() and (not self.thread_unit[tid].got_dependency("",cur_tick)) for tid in range(0, self.num_threads)]
         self.update_policy(cur_tick)
         self.issue_ptr = round_robin(self.issue_ptr, fetch_list, self.num_threads)
 

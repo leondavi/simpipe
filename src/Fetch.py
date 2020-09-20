@@ -30,6 +30,7 @@ class Fetch:
         self.thread_unit = None
         self.num_of_mem_access = 0
         self.branch_taken_in_queue = False
+        self.load_in_queue = False
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -47,6 +48,7 @@ class Fetch:
         self.NextInstMemPtr += 1
         self.prefetch_inst_count += 1
         self.branch_taken_in_queue |= first_inst.is_anomaly("Branch")
+        self.load_in_queue |= first_inst.is_anomaly("Load")
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
 
@@ -66,6 +68,7 @@ class Fetch:
                     empty_inst = True
                 else:
                     self.branch_taken_in_queue |= curr_inst.is_anomaly("Branch")
+                    self.load_in_queue |= curr_inst.is_anomaly("Load")
                     self.fetchQueue.push(curr_inst)
                     self.NextInstMemPtr += 1
                     self.prefetch_inst_count += 1
@@ -133,6 +136,7 @@ class Fetch:
         self.NextInstMemPtr = next_num
         self.flush_ongoing = True
         self.branch_taken_in_queue = False
+        self.load_in_queue = False
         return numOfInst_to_flush
 
     def report_statistics(self):
@@ -142,4 +146,4 @@ class Fetch:
                                                   self.NextInstMemPtr))
 
     def get_ae_in_queue(self):
-        return self.branch_taken_in_queue and (not self.fetchQueue.empty())
+        return (self.branch_taken_in_queue or self.load_in_queue) and (not self.fetchQueue.empty())
