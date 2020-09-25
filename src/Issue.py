@@ -100,9 +100,8 @@ class Issue:
             pass
 
     def coarse_policy(self,cur_tick):
-        if not self.issue_empty:
-            if self.issue_inst.is_event():
-                return
+        if self.execute_unit.stages.back().is_event(): # check if first stage in execute is event
+            return
         self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
     # Event - next instruction
