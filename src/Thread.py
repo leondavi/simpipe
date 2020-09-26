@@ -14,6 +14,9 @@ class Thread:
         self.ready = 0
         # statistics
 
+        # branch prediction
+        self.arch_inst_num = 0 # real path pc
+
     # Return True if command won't be able to execute
     # TODO - can be more sophisticate
     def got_dependency(self, inst, tick):

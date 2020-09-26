@@ -25,6 +25,9 @@ class Execute:
 
         self.generate_csv()
 
+        # bp
+        self.bp_en = params["BP_EN"] == "True" if "BP_EN" in params.keys() else BP_EN
+
     def generate_csv(self):
         if EX_DUMP_TO_CSV:
             with open(EX_DUMP_CSV_PATH,'w',newline='') as csv_file:
@@ -49,6 +52,9 @@ class Execute:
         self.count_committed_inst += not self.committed_inst.empty_inst
         self.committed_inst.end_tick = cur_tick
 
+        if not self.committed_inst.empty_inst:
+            self.update_arch_state()
+
         self.dump_to_csv(self.committed_inst) # only if EX_DUMP_TO_CSV is True
 
         tid = self.committed_inst.tid
@@ -58,13 +64,26 @@ class Execute:
         if self.committed_inst.is_anomaly("Load"):
             self.fetch_unit[tid].load_in_queue = False
 
-        if (not self.committed_inst.empty_inst) and (self.committed_inst.br_taken == 1):
+        if (not self.committed_inst.empty_inst) :
+            if  (self.committed_inst.br_taken == 1):
+                if self.bp_en:
+                    self.fetch_unit[tid].btb.update(self.committed_inst) #TODO
+                else:
+                    self.flush()
+            elif self.committed_inst.is_jump:
+                self.flush()
+
+    def update_arch_state(self):
+        tid = self.committed_inst.tid
+        if self.thread_unit[tid].arch_inst_num != self.committed_inst.num:
             self.flush()
+        else:
+            self.thread_unit[tid].arch_inst_num += 1
 
     # Clear thread from the pipeline
     def flush(self):
         tid = self.committed_inst.tid
-        next_inst_num = self.committed_inst.num + 1
+        next_inst_num = self.thread_unit[tid].arch_inst_num # self.committed_inst.num + 1
 
         is_flushed_inst = False
         for i in range(0, self.stages.size-1):

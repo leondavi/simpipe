@@ -11,7 +11,7 @@ class Pipeline:
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
         self.thread_unit = [Thread(tid,params) for tid in range(0, self.num_threads)]
-        self.fetch_unit = [Fetch(tid, memory, params) for tid in range(0, self.num_threads)]  # Create fetch unit
+        self.fetch_unit = [Fetch(tid, memory, params, self.thread_unit[tid]) for tid in range(0, self.num_threads)]  # Create fetch unit
         self.issue_unit = Issue(params)
         self.execute_unit = Execute(params)
         self.connect()

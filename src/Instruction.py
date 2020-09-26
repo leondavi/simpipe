@@ -30,6 +30,7 @@ class Instruction:
         self.rs2 = ""
         self.start_tick = None
         self.end_tick = None
+        self.is_jump = False
 
     def str(self):
         if self.inst_name == "Bubble":
@@ -43,7 +44,7 @@ class Instruction:
         return [self.pc,self.m_inst_hex,self.inst_grp,self.inst_name,self.br_taken,self.anomaly,self.start_tick,self.end_tick]
 
     def full_str(self):
-        return "{0}-BT-{1}-E{2} {3} {4}".format(self.str(), self.br_taken, self.empty(), self.m_inst[::-1], self.isa_str())
+        return "{0}-BT-{1}-E{2}-n{5}".format(self.str(), self.br_taken, self.empty(), self.m_inst[::-1], self.isa_str(), self.num) # {3} {4}
 
     def isa_str(self):
         return "{0},{1},{2},{3}".format(self.name, self.rd, self.rs1, self.rs2)
@@ -131,7 +132,7 @@ class Instruction:
         return not self == other
 
     @staticmethod
-    def inst_from_row(memory: Memory, ptr: int, tid):
+    def inst_from_row(memory: Memory, ptr: int, tid : int):
         csv_row = memory.get_row(ptr)
         csv_keys = memory.get_instruction_keys()
         new_inst = Instruction()
@@ -149,6 +150,7 @@ class Instruction:
         # The trace not indicate on taken branches
         if (new_inst.inst_name == "jal") or (new_inst.inst_name == "jalr"):
             new_inst.br_taken = 1
+            new_inst.is_jump = True
         new_inst.decode_inst()
         return new_inst
 

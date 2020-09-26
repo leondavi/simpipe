@@ -2,15 +2,17 @@ from FIFOQueue import FIFOQueue
 from Instruction import *
 from Definitions import *
 from Memory import Memory
+from BTB import BTB
 
 
 class Fetch:
 
-    def __init__(self, tid: int, memory : Memory, params):
+    def __init__(self, tid: int, memory : Memory, params, thread_unit):
         self.tid = tid
+        self.thread_unit = thread_unit
         self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
         self.fetchQueue = FIFOQueue(self.queue_size)
-        self.initMemPtr = 0
+        self.initMemPtr = self.thread_unit.arch_inst_num
         self.NextInstMemPtr = self.initMemPtr
         self.MaxPtr = memory.len()
         self.memory = memory
@@ -27,13 +29,29 @@ class Fetch:
         self.flushed_inst_count = 0
         self.dummy_inst_count = 0
         self.prefetch_ae =  params["PREFETCH_AE"] == "True" if "PREFETCH_AE" in params.keys() else PREFETCH_AE
-        self.thread_unit = None
+        self.bp_en = params["BP_EN"] == "True" if "BP_EN" in params.keys() else BP_EN
+        self.prefetch_ae = False if self.bp_en else self.prefetch_ae
         self.num_of_mem_access = 0
         self.branch_taken_in_queue = False
         self.load_in_queue = False
+        self.btb = BTB(self.memory,tid,BTB_TABLE_SIZE)
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
+
+    def fetch_stats_update(self,inst):
+        self.NextInstMemPtr += 1
+        self.prefetch_inst_count += 1
+        self.branch_taken_in_queue |= inst.is_anomaly("Branch")
+        self.load_in_queue |= inst.is_anomaly("Load")
+        if self.prefetch_ae and inst.is_anomaly("Branch"):
+            return False
+        if self.bp_en and inst.is_anomaly("Branch"):
+            btb_res = self.btb.predict(inst)
+            self.NextInstMemPtr = btb_res
+            return False
+        return True
+
 
     def fetch(self,cur_tick):
 
@@ -45,10 +63,8 @@ class Fetch:
         first_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
         first_inst.start_tick = cur_tick
         self.fetchQueue.push(first_inst)
-        self.NextInstMemPtr += 1
-        self.prefetch_inst_count += 1
-        self.branch_taken_in_queue |= first_inst.is_anomaly("Branch")
-        self.load_in_queue |= first_inst.is_anomaly("Load")
+        if not self.fetch_stats_update(first_inst):
+            return  # break the fetch due to branch
         # Calculate based on the current offset where the instruction located in the line
         max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
 
@@ -67,11 +83,9 @@ class Fetch:
                 if delta_pc != DEFAULT_INSTRUCTION_SIZE:
                     empty_inst = True
                 else:
-                    self.branch_taken_in_queue |= curr_inst.is_anomaly("Branch")
-                    self.load_in_queue |= curr_inst.is_anomaly("Load")
                     self.fetchQueue.push(curr_inst)
-                    self.NextInstMemPtr += 1
-                    self.prefetch_inst_count += 1
+                    if not self.fetch_stats_update(curr_inst):
+                        return # break the fetch due to branch
                     former_inst = curr_inst
 
             # None were pushed, create an empty instruction
@@ -147,3 +161,7 @@ class Fetch:
 
     def get_ae_in_queue(self):
         return (self.branch_taken_in_queue or self.load_in_queue) and (not self.fetchQueue.empty())
+
+
+    def dummy_btb(self,inst):
+        return 0
