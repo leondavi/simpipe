@@ -16,9 +16,12 @@ class RunModel:
     def simulator(self):
         params = self.pipeline_params
         prefetch_ae =  params["PREFETCH_AE"] == "True" if "PREFETCH_AE" in params.keys() else PREFETCH_AE
+        bp_en =  params["BP_EN"] == "True" if "BP_EN" in params.keys() else BP_EN
         issue_policy = params["ISSUE_POLICY"] if "ISSUE_POLICY" in params.keys() else ISSUE_POLICY
-        if (prefetch_ae==False) and (issue_policy=="EVENT_AE"):
+
+        if(issue_policy == "EVENT_AE") and not ( (bp_en == True) or (prefetch_ae == True) ):
             return
+
         cur_tick = 0
         while self.pipeline.tick(cur_tick):
             cur_tick += 1

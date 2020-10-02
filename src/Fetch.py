@@ -30,7 +30,6 @@ class Fetch:
         self.dummy_inst_count = 0
         self.prefetch_ae =  params["PREFETCH_AE"] == "True" if "PREFETCH_AE" in params.keys() else PREFETCH_AE
         self.bp_en = params["BP_EN"] == "True" if "BP_EN" in params.keys() else BP_EN
-        self.bp_en = False if not self.prefetch_ae else self.bp_en
         self.num_of_mem_access = 0
         self.branch_taken_in_queue = False
         self.load_in_queue = False
