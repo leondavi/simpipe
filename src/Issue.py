@@ -37,6 +37,7 @@ class Issue:
         if (not self.issue_empty) and (self.issue_inst.tid == tid):
             self.count_flushed_inst += 1
             self.issue_empty = True
+            self.issue_inst.empty_inst = 1
             return True
         return False
 

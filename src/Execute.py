@@ -75,7 +75,7 @@ class Execute:
 
         # Clear other units
         self.thread_unit[tid].flush()
-        is_flushed_inst = is_flushed_inst or self.issue_unit.flush(tid)
+        is_flushed_inst = self.issue_unit.flush(tid) or is_flushed_inst
         self.fetch_unit[tid].flush(next_inst_num) #in fetch we don't do pipeline flush - we just change pointer reference since it is a queue
 
         if is_flushed_inst:
