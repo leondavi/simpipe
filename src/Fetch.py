@@ -65,7 +65,7 @@ class Fetch:
         if not self.fetch_stats_update(first_inst):
             return  # break the fetch due to branch
         # Calculate based on the current offset where the instruction located in the line
-        max_fetch_size = self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1
+        max_fetch_size = int(self.fetch_size - ((int(first_inst.pc) / DEFAULT_INSTRUCTION_SIZE) % self.fetch_size) - 1)
 
         former_inst = first_inst  # Used inside the loop to track last instruction
         empty_inst = False  # Once set, the rest instruction that pushed are empty

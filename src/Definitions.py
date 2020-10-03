@@ -7,7 +7,7 @@ SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
 
 # Simulation ARGS
-NUM_THREADS = 2
+NUM_THREADS = 1
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
 ISSUE_POLICY = "EVENT_AE" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
@@ -21,7 +21,7 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-PTRMAX = 10000000
+#PTRMAX = 1000
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
 VERB = "DEBUG"  # [0,1,2]
@@ -37,7 +37,7 @@ EXP_PREFIX = ''
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
-PREFETCH_DELAY = 4   # The delay from the cycle it granted to received
+PREFETCH_DELAY = 2   # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
 HAZARD_MEM_DELAY = 2
