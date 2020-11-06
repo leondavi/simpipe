@@ -149,6 +149,7 @@ class Instruction:
         new_inst.inst_grp = int(csv_row[csv_keys["inst_grp"]])
         # The trace not indicate on taken branches
         if (new_inst.inst_name == "jal") or (new_inst.inst_name == "jalr"):
+            new_inst.anomaly = 1
             new_inst.br_taken = 1
             new_inst.is_jump = True
         new_inst.decode_inst()

@@ -67,7 +67,7 @@ class Execute:
         if (not self.committed_inst.empty_inst) :
             if  (self.committed_inst.br_taken == 1):
                 if self.bp_en:
-                    self.fetch_unit[tid].btb.update(self.committed_inst) #TODO
+                    self.fetch_unit[tid].btb.validator_ex(self.committed_inst) #TODO
                 else:
                     self.flush()
             elif self.committed_inst.is_jump:

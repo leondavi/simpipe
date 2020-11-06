@@ -15,16 +15,16 @@ PREFETCH_POLICY = "RR"
 PREFETCH_AE = False
 #PREFETCH_AE = False
 BP_EN = True
-BTB_TABLE_SIZE = 16
+BTB_TABLE_SIZE = 32
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-#PTRMAX = 1000
+PTRMAX = 200000
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
-VERB = "DEBUG"  # [0,1,2]
+VERB = "NONE"  # [0,1,2]
 
 EX_DUMP_TO_CSV = False
 EX_DUMP_CSV_PATH = "appname.csv"
@@ -33,7 +33,7 @@ def pprint(msg, verb="DEBUG"):
     if VERB_LVL[verb] <= VERB_LVL[VERB]:
         print(msg)
 
-EXP_PREFIX = ''
+EXP_PREFIX = 'btb_new'
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size

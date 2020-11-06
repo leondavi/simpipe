@@ -45,10 +45,13 @@ class Fetch:
         self.load_in_queue |= inst.is_anomaly("Load")
         if self.prefetch_ae and inst.is_anomaly("Branch"):
             return False
-        if self.bp_en and inst.is_anomaly("Branch"):
+        if self.bp_en:
+            if inst.is_branch():
+                self.btb.update(inst,inst.is_anomaly(type="Branch"))
             btb_res = self.btb.predict(inst)
-            self.NextInstMemPtr = btb_res
-            return False
+            if btb_res != self.btb.NOT_FOUND:
+                self.NextInstMemPtr = btb_res
+                return False
         return True
 
 
@@ -154,9 +157,9 @@ class Fetch:
 
     def report_statistics(self):
         print("Fetch TID={0} prefetch_inst_count={1} dummy_count={2} flushed_inst={3} mem_len={4} " 
-              "mem_delay={5} next_ptr={6}".format(self.tid, self.prefetch_inst_count, self.dummy_inst_count,
+              "mem_delay={5} next_ptr={6} btb_success={7} btb_falseAlarm={8}".format(self.tid, self.prefetch_inst_count, self.dummy_inst_count,
                                                   self.flushed_inst_count, self.memory.len(), self.prefetch_delay,
-                                                  self.NextInstMemPtr))
+                                                  self.NextInstMemPtr,self.btb.get_success_rate(),self.btb.get_false_alram_rate()))
 
     def get_ae_in_queue(self):
         return (self.branch_taken_in_queue or self.load_in_queue) and (not self.fetchQueue.empty())
