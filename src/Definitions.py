@@ -14,7 +14,7 @@ ISSUE_POLICY = "EVENT_AE" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "E
 PREFETCH_POLICY = "RR"
 PREFETCH_AE = False
 #PREFETCH_AE = False
-BP_EN = True
+BP_EN = False
 BTB_TABLE_SIZE = 32
 # Control args
 VERB_ON = False
