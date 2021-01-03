@@ -16,8 +16,6 @@ class Issue:
         self.thread_unit = None
         self.fetch_unit = None
         self.execute_unit = None
-        #anomaly
-        self.anomaly_enabled = params["EN_ANOMALY"] == "True" if "EN_ANOMALY" in params.keys() else DEFAULT_EN_ANOMALY
 
     # Tick issue state
     # Check if there exists an instruction in issue, if the instruction can be executed push it
@@ -39,6 +37,7 @@ class Issue:
         if (not self.issue_empty) and (self.issue_inst.tid == tid):
             self.count_flushed_inst += 1
             self.issue_empty = True
+            self.issue_inst.empty_inst = 1
             return True
         return False
 
@@ -58,16 +57,33 @@ class Issue:
         else:
             self.execute_unit.push(Instruction.empty_inst(0))
 
+    def get_fetch_list(self,cur_tick):
+        thread_dependency_list = [self.thread_unit[tid].got_dependency("", cur_tick+1) for tid in range(0, self.num_threads)]
+        fetch_queues_len_list = [(self.fetch_unit[tid].fetchQueue.len()  > 0) for tid in range(0, self.num_threads)]
+        combined_fetch_list = [fetch_queues_len_list[tid] and (not thread_dependency_list[tid]) for tid in range(0, self.num_threads)]
+
+        if sum(fetch_queues_len_list) == 1:
+            return fetch_queues_len_list
+
+        if self.issue_policy == "EVENT":
+            return combined_fetch_list
+        elif self.issue_policy == "EVENT_AE":
+            return combined_fetch_list
+        elif self.issue_policy == "COARSE":
+            pass
+        elif self.issue_policy == "RR":
+            pass
+
+        return fetch_queues_len_list
+
     def schedule_inst(self, cur_tick):
-        fetch_list = [self.fetch_unit[tid].fetchQueue.len() for tid in range(0, self.num_threads)]
+        fetch_list = self.get_fetch_list(cur_tick)
         self.update_policy(cur_tick)
         self.issue_ptr = round_robin(self.issue_ptr, fetch_list, self.num_threads)
 
         if fetch_list[self.issue_ptr]:
             self.issue_inst = self.fetch_unit[self.issue_ptr].fetchQueue.pop()
             self.issue_empty = False
-            if self.issue_inst.anomaly and self.anomaly_enabled and self.issue_inst.is_branch():
-                self.thread_unit[self.issue_ptr].set_anomaly(True,stage="Execute")
         else:  # Push empty inst
             self.issue_inst = Instruction.empty_inst(0)
             self.issue_empty = True
@@ -77,33 +93,17 @@ class Issue:
     def update_policy(self, cur_tick):
         if self.issue_policy == "EVENT":
             self.event_policy(cur_tick)
+        elif self.issue_policy == "EVENT_AE":
+            self.event_ae_policy(cur_tick)
         elif self.issue_policy == "COARSE":
-            self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
-        elif self.issue_policy == "RR_ANOMALY_PERSISTENT":
-            self.round_robin_anomaly_persistent_policy()
+            self.coarse_policy(cur_tick)
         elif self.issue_policy == "RR":
             pass
 
-    def round_robin_anomaly_persistent_policy(self):
-        if not self.anomaly_enabled:
+    def coarse_policy(self,cur_tick):
+        if self.execute_unit.stages.back().is_event(): # check if first stage in execute is event
             return
-
-        next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
-        if self.fetch_unit[self.issue_ptr].fetchQueue.len() > 0 and\
-           self.thread_unit[self.issue_ptr].is_anomaly(stage="Fetch") and\
-           not self.thread_unit[self.issue_ptr].is_anomaly(stage="Execute"):
-
-            self.issue_ptr -= 1  # RR performs +1 so we force it to be persistent
-            return
-
-        tmp_ptr = self.issue_ptr
-        for tid in range(0,self.num_threads):
-            tmp_ptr = (tmp_ptr+1) % self.num_threads
-            anomaly_case = self.fetch_unit[tmp_ptr].fetchQueue and\
-                            self.thread_unit[self.issue_ptr].is_anomaly(stage="Fetch")
-            if anomaly_case:
-                self.issue_ptr = (tmp_ptr-1) % self.num_threads # -1 so in the next round robin it will point on it
-                return
+        self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
     # Event - next instruction
     def event_policy(self, cur_tick):
@@ -111,7 +111,16 @@ class Issue:
             next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
             # check if next cycle the instruction will pass Issue
             if next_inst.is_event() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
-                self.issue_ptr = coarse_policy(self.issue_ptr, self.num_threads)
+                self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
+
+    # Event AE - next instruction
+    def event_ae_policy(self, cur_tick):
+        if self.fetch_unit[self.issue_ptr].fetchQueue.len() != 0:
+            next_inst = self.fetch_unit[self.issue_ptr].fetchQueue.front()
+            # check if next cycle the instruction will pass Issue
+            if self.fetch_unit[self.issue_ptr].get_ae_in_queue() and (not self.thread_unit[self.issue_ptr].got_dependency(next_inst, cur_tick)):
+                self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
+
 
     def report_model(self):
         print("Issue Thread_num={0} Issue_policy={1} speculative={2} flushed={3}"

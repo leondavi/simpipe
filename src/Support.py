@@ -7,5 +7,5 @@ def round_robin(ptr, req, size):
     return ptr
 
 
-def coarse_policy(ptr, size):
+def lock_ptr(ptr, size):
         return (ptr - 1) % size
