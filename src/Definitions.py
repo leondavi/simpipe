@@ -7,24 +7,24 @@ SIMULATION_FILE = "../data/histtab_tid_0_ctr_0.csv"
 DEAFULT_TABLE_PREFIX = "histtab_tid_"
 
 # Simulation ARGS
-NUM_THREADS = 1
+NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
 ISSUE_POLICY = "EVENT_AE" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR"
 PREFETCH_AE = False
 #PREFETCH_AE = False
-BP_EN = True
+BP_EN = False
 BTB_TABLE_SIZE = 32
 # Control args
 VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-PTRMAX = 200000
+PTRMAX = 200
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
-VERB = "NONE"  # [0,1,2]
+VERB = "DEBUG"  # [0,1,2]
 
 EX_DUMP_TO_CSV = False
 EX_DUMP_CSV_PATH = "appname.csv"
