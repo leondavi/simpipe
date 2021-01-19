@@ -112,8 +112,10 @@ class BTB:
         return self.NOT_FOUND
 
     def get_success_rate(self):
+        self.total_predictions = self.total_predictions if self.total_predictions else 1
         return self.success_count/self.total_predictions
 
     def get_false_alram_rate(self):
+        self.total_predictions = self.total_predictions if self.total_predictions else 1
         return self.false_alarm_count/self.total_predictions
 

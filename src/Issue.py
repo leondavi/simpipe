@@ -70,7 +70,7 @@ class Issue:
         elif self.issue_policy == "EVENT_AE":
             return combined_fetch_list
         elif self.issue_policy == "COARSE":
-            pass
+            return combined_fetch_list
         elif self.issue_policy == "RR":
             pass
 
@@ -101,8 +101,11 @@ class Issue:
             pass
 
     def coarse_policy(self,cur_tick):
-        if self.execute_unit.stages.back().is_event(): # check if first stage in execute is event
+        inst_ev = self.execute_unit.stages.at(1)
+        if inst_ev and inst_ev.br_taken:
             return
+        # if self.execute_unit.stages.back().is_event(): # check if first stage in execute is event
+        #     return
         self.issue_ptr = lock_ptr(self.issue_ptr, self.num_threads)
 
     # Event - next instruction
