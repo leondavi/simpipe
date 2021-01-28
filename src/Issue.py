@@ -32,6 +32,11 @@ class Issue:
         if self.issue_empty:
             self.schedule_inst(cur_tick)
 
+        issued_inst = self.execute_unit.stages.at(0)
+        tid = self.issue_inst.tid
+        if issued_inst:
+            self.thread_unit[tid].set_dependency(issued_inst, cur_tick, self.speculative)  # TODO -what is the latency
+
     # Check if issue need to be cleared in case of flush
     def flush(self, tid):
         if (not self.issue_empty) and (self.issue_inst.tid == tid):
@@ -51,7 +56,6 @@ class Issue:
     def push_inst(self, tick):
         tid = self.issue_inst.tid
         if not self.thread_unit[tid].got_dependency(self.issue_inst, tick):
-            self.thread_unit[tid].set_dependency(self.issue_inst, tick, self.speculative)  # TODO -what is the latency
             self.execute_unit.push(self.issue_inst)
             self.issue_empty = True
         else:
@@ -101,7 +105,7 @@ class Issue:
             pass
 
     def coarse_policy(self,cur_tick):
-        inst_ev = self.execute_unit.stages.at(1)
+        inst_ev = self.execute_unit.stages.at(2)
         if inst_ev and inst_ev.br_taken:
             return
         # if self.execute_unit.stages.back().is_event(): # check if first stage in execute is event

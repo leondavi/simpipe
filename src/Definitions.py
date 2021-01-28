@@ -10,7 +10,7 @@ DEAFULT_TABLE_PREFIX = "histtab_tid_"
 NUM_THREADS = 4
 NUM_STAGES = 4
 SPECULATIVE = True  # [True, False] # True - keep push instructions without knowing the result
-ISSUE_POLICY = "EVENT" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
+ISSUE_POLICY = "RR" #["RR_ANOMALY_PERSISTENT","RR"]  # ["RR", "COARSE", "EVENT","RR_ANOMALY_PERSISTENT]
 PREFETCH_POLICY = "RR"
 PREFETCH_AE = False
 #PREFETCH_AE = False
@@ -21,7 +21,7 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-PTRMAX = 100000
+#PTRMAX = 20000
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
 VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
@@ -33,11 +33,11 @@ def pprint(msg, verb="DEBUG"):
     if VERB_LVL[verb] <= VERB_LVL[VERB]:
         print(msg)
 
-EXP_PREFIX = 'coarse_new'
+EXP_PREFIX = 'coarse2_new'
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
-PREFETCH_DELAY = 2   # The delay from the cycle it granted to received
+PREFETCH_DELAY = 3   # The delay from the cycle it granted to received
 FETCH_SIZE = 4  # Default number of instructions
 
 HAZARD_MEM_DELAY = 2
@@ -49,6 +49,9 @@ MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
 # generate permutations
 num_thread_list = [1, 2, 4]
 issue_policy_list = ["RR","EVENT","COARSE"]
+#issue_policy_list = ["RR","EVENT","COARSE","RR_ANOMALY_PERSISTENT"] BP_EN = False and PREFETCH_AE = True
+#issue_policy_list = ["RR","EVENT","COARSE","RR_ANOMALY_PERSISTENT"] BP_EN = True and  PREFETCH_AE = True
+
 speculative_list = [False, True]
 num_stages_list = [3, 4, 5]
 prefetch_delay_list = [2,3,4]
