@@ -1,7 +1,7 @@
 from Definitions import *
 from Instruction import *
 import json
-class Decode():
+class Decode(): #hey david
 
     def __init__(self,instruction):
         instruction.opcode = (instruction.m_inst[0:7])[::-1]            #leftovers from old decode logic
