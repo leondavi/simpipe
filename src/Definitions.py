@@ -38,13 +38,16 @@ EXP_PREFIX = 'coarse_new'
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
 IQ_SIZE = 8  # Instruction Queue(IQ) size
 PREFETCH_DELAY = 2   # The delay from the cycle it granted to received
-FETCH_SIZE = 4  # Default number of instructions
+FETCH_SIZE = 4  # Default number of instructions TODO Omri change to number of bytes
 
 HAZARD_MEM_DELAY = 2
 HAZARD_MULDIV_DELAY = 3
 FORWARD_EN = False # [True, False]  # False- forward in from 2 places, single cycle inst or commit
 
 MEM_DICT = {'mem_path': SIMULATION_FILE, 'ptrMax': None}
+
+# Dummy padding TODO Omri
+# [ONLY_COMPRESSED, NON_COMPRESSED, RANDOM]
 
 # generate permutations
 num_thread_list = [1, 2, 4]

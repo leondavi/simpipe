@@ -11,7 +11,7 @@ class Fetch:
         self.tid = tid
         self.thread_unit = thread_unit
         self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
-        self.fetchQueue = FIFOQueue(self.queue_size)
+        self.fetchQueue = FIFOQueue(self.queue_size) #TODO Omri change queue to bytes
         self.initMemPtr = self.thread_unit.arch_inst_num
         self.NextInstMemPtr = self.initMemPtr
         self.MaxPtr = memory.len()
@@ -90,12 +90,12 @@ class Fetch:
                         return # break the fetch due to branch
                     former_inst = curr_inst
 
-            # None were pushed, create an empty instruction
-            if empty_inst:
-                dummy_inst = Instruction.empty_inst(self.tid, "dummy", False)
-                dummy_inst.pc = str(int(first_inst.pc)+4*(i+1))
-                self.fetchQueue.push(dummy_inst)
-                self.dummy_inst_count += 1
+                         # None were pushed, create an empty instruction
+                if empty_inst:
+                    dummy_inst = Instruction.empty_inst(self.tid, "dummy", False)
+                    dummy_inst.pc = str(int(first_inst.pc) + 4 * (i + 1))
+                    self.fetchQueue.push(dummy_inst)
+                    self.dummy_inst_count += 1
 
             self.fetchQueue.back().start_tick = cur_tick
 
