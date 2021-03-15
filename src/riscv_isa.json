@@ -921,80 +921,218 @@
 		},
 		"01100":
 		{
-		"name":"RV32M",
-		"last_level":false,
-		"bit_range":[12,14],
-		"000":
+			"name":"RV32M",
+			"last_level":false,
+			"bit_range":[12,14],
+			"000":
 			{
-			"name": "MUL",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"ADD/SUB/MUL",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "MUL",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "ADD",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0100000":
+				{
+					"name": "SUB",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"001":
+			"001":
 			{
-			"name": "MULH",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"SLL/MULH",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "MULH",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "SLL",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"010":
+			"010":
 			{
-			"name": "MULHSU",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"SLT/MULHSU",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "MULHSU",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "SLT",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"011":
+			"011":
 			{
-			"name": "MULHU",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"SLTU/MULHU",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "MULHU",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "SLTU",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"100":
+			"100":
 			{
-			"name": "DIV",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"DIV/XOR",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "DIV",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "XOR",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"101":
+			"101":
 			{
-			"name": "DIVU",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"DIVU/SRL/SRA",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "DIVU",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "SRL",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0100000":
+				{
+					"name": "SRA",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"110":
+			"110":
 			{
-			"name": "REM",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"REM/OR",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "REM",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "OR",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			},
-		"111":
+			"111":
 			{
-			"name": "REMU",
-			"last_level":true,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+				"name":"REMU/AND",
+				"last_level":false,
+				"bit_range":[25,31],
+				"0000001":
+				{
+					"name": "REMU",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				},
+				"0000000":
+				{
+					"name": "AND",
+					"last_level":true,
+					"fields":["rd","rs1","rs2"],
+					"rd":[7,11],
+					"rs1":[15,19],
+					"rs2":[20,24]
+				}
 			}
 		},
 		"01110":
