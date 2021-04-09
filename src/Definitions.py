@@ -21,9 +21,9 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-PTRMAX = 1000
+PTRMAX = 10000
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
-VERB = "DEBUG"  # [0,1,2]
+VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
 
 EX_DUMP_TO_CSV = False
@@ -36,9 +36,14 @@ def pprint(msg, verb="DEBUG"):
 EXP_PREFIX = 'coarse_new'
 
 DEFAULT_INSTRUCTION_SIZE = 4  # Instruction size in bytes
-IQ_SIZE = 8  # Instruction Queue(IQ) size
+#IQ_SIZE = 8  # Instruction Queue(IQ) size
+IQ_SIZE = 32  # Fetch Queue size in Bytes
+SIZE_OF_NON_COMP_DUMMY = 4
+SIZE_OF_COMP_DUMMY = 2
 PREFETCH_DELAY = 2   # The delay from the cycle it granted to received
-FETCH_SIZE = 4  # Default number of instructions TODO Omri change to number of bytes
+
+#FETCH_SIZE = 4  # Default number of instructions TODO Omri change to number of bytes
+FETCH_SIZE = 16 # in bytes
 
 HAZARD_MEM_DELAY = 2
 HAZARD_MULDIV_DELAY = 3

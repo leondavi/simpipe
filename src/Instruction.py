@@ -32,6 +32,9 @@ class Instruction:
         self.start_tick = None
         self.end_tick = None
         self.is_jump = False
+        self.is_comp = False
+        self.size_in_bytes = 0
+
 
     def str(self):
         if self.inst_name == "Bubble":

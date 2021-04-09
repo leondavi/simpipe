@@ -33,6 +33,7 @@ class Decode(): #hey david
             arr_tmp = json.load(f)
         last = False    #when we get to a leaf last=true
         comp = 1        #compressed instruction
+        instruction.is_comp = True
         if (instruction.m_inst[1] == "0" and instruction.m_inst[0] == "0"): #compressed quardrad0
             arr_tmp = arr_tmp["00"]
         if (instruction.m_inst[1] == "0" and instruction.m_inst[0] == "1"): #compressed quardrad1
@@ -42,6 +43,8 @@ class Decode(): #hey david
         if (instruction.m_inst[1] == "1" and instruction.m_inst[0] == "1"): #non-compressed
             arr_tmp = arr_tmp["11"]
             comp = 0
+            instruction.is_comp = False
+
 
         while (last == 0):       # decending down the decoding tree until last leve/ leaf
             last = arr_tmp['last_level']
@@ -66,3 +69,7 @@ class Decode(): #hey david
                 instruction.rs1=values[i]
             elif (fields[i]=='rs2'):
                 instruction.rs2=values[i]
+        if(instruction.is_comp):
+            instruction.size_in_bytes = 2
+        else:
+            instruction.size_in_bytes = 4
