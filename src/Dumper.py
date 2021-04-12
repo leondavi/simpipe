@@ -20,5 +20,5 @@ class Dumper(): #hey david
     def PrintDF(self):
         print(self.Inst_DataSet)
     def Dump_To_CSV(self):
-        path = CSV_DUMP_PATH+'/'+DUMP_NAME
+        path = CSV_DUMP_PATH+'/'+DUMP_NAME+'.csv'
         self.Inst_DataSet.to_csv(path)

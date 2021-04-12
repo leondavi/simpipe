@@ -64,7 +64,8 @@ class Fetch:
         #TODO - added!
         Current_Window_Dump = pd.DataFrame([],columns=DUMPING_COLS)
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
-            self.dumper.Dump_To_CSV()
+            if(DUMP_ENABLE):
+                self.dumper.Dump_To_CSV()
             return False
 
         # First instruction must be pushed and update the pointers
@@ -138,7 +139,7 @@ class Fetch:
             self.fetchQueue.back().start_tick = cur_tick
         # TODO - added!
         self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
-        self.dumper.PrintDF()
+        #self.dumper.PrintDF()
         return True
 
     # Progress pre-fetching, checks if got pending fetch request, and the fetch delay is passed.
