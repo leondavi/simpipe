@@ -62,6 +62,7 @@ class Decode(): #hey david
 
         values, fields = self.decodeFields(instruction.m_inst, arr_tmp)
         instruction.name=arr_tmp['name']
+        instruction.is_branch = arr_tmp['Branch']
         for i in range(len(fields)):
             if (fields[i]=='rd'):
                 instruction.rd=values[i]

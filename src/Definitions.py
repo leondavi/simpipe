@@ -21,9 +21,9 @@ VERB_ON = False
 DEFAULT_TIMEOUT = 50  # Number of ticks without instruction, setting to -1 will turn it off
 PTRMAX = 10000000
 #PTRMAX = None # no limit
-PTRMAX = 1000
+PTRMAX = None
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
-VERB = "DEBUG"  # [0,1,2]
+VERB = "NONE"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
 
 EX_DUMP_TO_CSV = False
@@ -112,4 +112,7 @@ MULDIV64 = {0: "MULW", 4: "DIVW", 5: "DIVUW", 6: "REMW", 7: "REMUW"}
 #  - print to CSV pipeline, and rgr
 #  - Anomaly detection influence inside the pipeline - [David]
 
-
+#Dumping Definitions
+DUMPING_COLS = {'COMPRESSED', 'BRANCH', 'NAME'}
+CSV_DUMP_PATH = 'C:/Users/omrir/Desktop/University/Project/Dumps'
+DUMP_NAME = 'comp_dijestra'

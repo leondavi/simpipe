@@ -8,7 +8,6 @@ from RegressionPermutation import *
 from RunModel import *
 from datetime import datetime
 
-
 # Running the regression list
 def run_rgr():
     now = datetime.now()
@@ -64,6 +63,11 @@ def mem_params_from_args():
     mem_params = MEM_DICT
     if 'dir' in args_params:
         mem_params['mem_path'] = args_params['dir']
+        length = len(mem_params['mem_path'])
+        i=length
+        while(mem_params['mem_path'][i-1] !="\\"):
+            i-=1
+        Application_name = mem_params['mem_path'][i:length]
     if 'ptrMax' in args_params:
         mem_params['ptrMax'] = args_params['ptrMax']
 

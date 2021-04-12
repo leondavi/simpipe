@@ -3,15 +3,17 @@ from Instruction import *
 from Definitions import *
 from Memory import Memory
 from BTB import BTB
+import pandas as pd
+from Dumper import *
 MINIMAL_NUMBER_OF_BYTES_TO_FETCH = 2
 
 class Fetch:
 
-    def __init__(self, tid: int, memory : Memory, params, thread_unit):
+    def __init__(self, tid: int, memory : Memory, params, thread_unit,Dumper):
         self.tid = tid
         self.thread_unit = thread_unit
         self.queue_size = int(params["IQ_SIZE"]) if "IQ_SIZE" in params.keys() else IQ_SIZE
-        self.fetchQueue = FetchQueue(self.queue_size) #TODO Omri change queue to bytes - changed
+        self.fetchQueue = FetchQueue(self.queue_size)
         self.initMemPtr = self.thread_unit.arch_inst_num
         self.NextInstMemPtr = self.initMemPtr
         self.MaxPtr = memory.len()
@@ -35,6 +37,7 @@ class Fetch:
         self.branch_taken_in_queue = False
         self.load_in_queue = False
         self.btb = BTB(self.memory,tid,BTB_TABLE_SIZE)
+        self.dumper = Dumper
 
     def set_mem_ptr(self, ptr_val: int):
         self.NextInstMemPtr = ptr_val
@@ -58,7 +61,10 @@ class Fetch:
 
     def fetch(self,cur_tick):
         # Check that the address is valid.
+        #TODO - added!
+        Current_Window_Dump = pd.DataFrame([],columns=DUMPING_COLS)
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
+            self.dumper.Dump_To_CSV()
             return False
 
         # First instruction must be pushed and update the pointers
@@ -81,6 +87,8 @@ class Fetch:
         else:
             remaining_bytes = self.fetch_size - 2
             self.half_inst_flag = False
+        #TODO added!
+        Current_Window_Dump = self.dumper.Window_Dump_Append(Current_Window_Dump,first_inst)
 
         former_inst = first_inst  # Used inside the loop to track last instruction
         empty_inst = False  # Once set, the rest instruction that pushed are empty
@@ -90,6 +98,7 @@ class Fetch:
         while(remaining_bytes >= MINIMAL_NUMBER_OF_BYTES_TO_FETCH):
             # Check if next address is valid
             if not self.ptr_within_mem_range(self.NextInstMemPtr):
+                self.dumper.Dump_To_CSV()
                 return False
             else:
                 curr_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
@@ -102,9 +111,14 @@ class Fetch:
                 else:
                     if (curr_inst.is_comp == False and remaining_bytes == MINIMAL_NUMBER_OF_BYTES_TO_FETCH):
                         self.half_inst_flag = True
+                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
                         return
                     self.fetchQueue.push(curr_inst)
+                    #TODO - added!
+                    Current_Window_Dump = self.dumper.Window_Dump_Append(Current_Window_Dump, curr_inst)
+
                     if not self.fetch_stats_update(curr_inst):
+                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
                         return  # break the fetch due to branch
                     former_inst = curr_inst
                     remaining_bytes -= curr_inst.size_in_bytes
@@ -122,6 +136,9 @@ class Fetch:
                         dummy_inst.size_in_bytes = SIZE_OF_NON_COMP_DUMMY
                     remaining_bytes -= dummy_inst.size_in_bytes
             self.fetchQueue.back().start_tick = cur_tick
+        # TODO - added!
+        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
+        self.dumper.PrintDF()
         return True
 
     # Progress pre-fetching, checks if got pending fetch request, and the fetch delay is passed.

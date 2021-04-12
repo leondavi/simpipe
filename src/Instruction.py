@@ -11,7 +11,7 @@ class Instruction:
     def __init__(self, tid=0, pc="", inst_name="x", inst_num="x", empty_inst=True):
         self.pc = pc
         self.inst_name = inst_name
-        self.br_taken = 0
+        self.br_taken = 0 #
         self.m_inst = ""
         self.m_inst_hex = ""
         self.inst_grp = 0
@@ -34,6 +34,7 @@ class Instruction:
         self.is_jump = False
         self.is_comp = False
         self.size_in_bytes = 0
+        self.is_branch = False
 
 
     def str(self):
