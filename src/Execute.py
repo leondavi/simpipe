@@ -6,11 +6,12 @@ import csv
 # Used as a stage In the pipeline
 class Execute:
 
-    def __init__(self,  params=dict()):
+    def __init__(self,Dumper,  params=dict()):
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
         self.stages = FIFOQueue(self.num_stages)
         self.stages.set_q_list([Instruction.empty_inst(0)] * self.num_stages)
+        self.dumper=Dumper
         # Statistics
         self.committed_inst = Instruction()
         self.count_flushed_inst = 0
@@ -72,6 +73,13 @@ class Execute:
                     self.flush()
             elif self.committed_inst.is_jump:
                 self.flush()
+                #TODO - OMRI DUMPING
+        if(self.committed_inst.br_taken == 1 and self.committed_inst.is_branch):
+            current_inst_pc = self.committed_inst.pc
+            #index = self.dumper.Inst_DataSet.index[self.dumper.Inst_DataSet['PC'] == current_inst_pc].to_list()
+            index = self.dumper.Inst_DataSet[self.dumper.Inst_DataSet['PC'] == current_inst_pc].index
+            print ("Branch Taken!")
+            self.dumper.Inst_DataSet.loc[self.dumper.Inst_DataSet.index == index[0], 'BR_TAKEN'] = 1
 
     def update_arch_state(self):
         tid = self.committed_inst.tid

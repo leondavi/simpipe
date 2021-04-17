@@ -23,7 +23,7 @@ PTRMAX = 10000000
 #PTRMAX = None # no limit
 PTRMAX = 100
 VERB_LVL = {"NONE": 0, "NORM": 1, "DEBUG": 2}
-VERB = "NONE"  # [0,1,2]
+VERB = "DEBUG"  # [0,1,2]
 #VERB = "DEBUG"  # [0,1,2]
 
 EX_DUMP_TO_CSV = False
@@ -114,6 +114,6 @@ MULDIV64 = {0: "MULW", 4: "DIVW", 5: "DIVUW", 6: "REMW", 7: "REMUW"}
 
 #Dumping Definitions
 DUMP_ENABLE = True
-DUMPING_COLS = {'NAME', 'BRANCH', 'COMPRESS'}
+DUMPING_COLS = ["Window Num","NAME","PC","COMPRESS","BRANCH", "BR_TAKEN","Load"]
 CSV_DUMP_PATH = 'C:/Users/omrir/Desktop/University/Project/Dumps'
 DUMP_NAME = 'comp_dijestra'

@@ -14,7 +14,7 @@ class Pipeline:
         self.thread_unit = [Thread(tid,params) for tid in range(0, self.num_threads)]
         self.fetch_unit = [Fetch(tid, memory, params, self.thread_unit[tid],self.dumper) for tid in range(0, self.num_threads)]  # Create fetch unit
         self.issue_unit = Issue(params)
-        self.execute_unit = Execute(params)
+        self.execute_unit = Execute(self.dumper, params)
         self.connect()
         self.timer = DEFAULT_TIMEOUT
         # Prefetch

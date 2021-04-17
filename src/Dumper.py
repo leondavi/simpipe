@@ -7,15 +7,17 @@ from Definitions import *
 
 class Dumper(): #hey david
     def __init__(self):
-        columns1 = DUMPING_COLS
-        self.Inst_DataSet = pd.DataFrame(columns=columns1)
+        self.Inst_DataSet = pd.DataFrame(columns=DUMPING_COLS)
+        self.window = 0
 
     def Window_Dump_Append(self,Current_Window,Instruction):
-        df_temp = pd.DataFrame([[Instruction.name, Instruction.is_comp, Instruction.is_branch]], columns=DUMPING_COLS)
-        return Current_Window.append(df_temp,ignore_index=True)
+        #["NAME","PC","COMPRESS","BRANCH", "BR_TAKEN","Load"]
+        df_temp = pd.DataFrame([[self.window,Instruction.name, Instruction.pc,Instruction.is_comp, Instruction.is_branch,0,Instruction.is_Load]], columns=DUMPING_COLS)
+        return Current_Window.append(df_temp)
 
     def Add_Current_Window_To_DF(self,Current_Window):
-        self.Inst_DataSet = self.Inst_DataSet.append(Current_Window)
+        self.Inst_DataSet = self.Inst_DataSet.append(Current_Window,ignore_index=True)
+        self.window += 1
         return 0
     def PrintDF(self):
         print(self.Inst_DataSet)

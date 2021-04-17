@@ -35,7 +35,7 @@ class Instruction:
         self.is_comp = False
         self.size_in_bytes = 0
         self.is_branch = False
-
+        self.is_Load = False
 
     def str(self):
         if self.inst_name == "Bubble":

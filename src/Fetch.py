@@ -50,11 +50,12 @@ class Fetch:
         if self.prefetch_ae and inst.is_anomaly("Branch"):
             return False
         if self.bp_en:
-            if inst.is_branch():
+            if inst.is_branch:
                 self.btb.update(inst,inst.is_anomaly(type="Branch"))
             btb_res = self.btb.predict(inst)
             if btb_res != self.btb.NOT_FOUND:
                 self.NextInstMemPtr = btb_res
+                print (btb_res)
                 return False
         return True
 
@@ -62,6 +63,7 @@ class Fetch:
     def fetch(self,cur_tick):
         # Check that the address is valid.
         #TODO - added!
+
         Current_Window_Dump = pd.DataFrame([],columns=DUMPING_COLS)
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
             if(DUMP_ENABLE):
