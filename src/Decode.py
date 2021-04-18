@@ -72,6 +72,11 @@ class Decode(): #hey david
                 instruction.rs1=values[i]
             elif (fields[i]=='rs2'):
                 instruction.rs2=values[i]
+        if(instruction.rs1_vld):
+            instruction.read_registers[0]=  instruction.rs1
+        if (instruction.rs2_vld):
+            instruction.read_registers[1] = instruction.rs2
+
         if(instruction.is_comp):
             instruction.size_in_bytes = 2
         else:

@@ -64,6 +64,7 @@ class Fetch:
         # Check that the address is valid.
         #TODO - added!
 
+        Window_Size = 1
         Current_Window_Dump = pd.DataFrame([],columns=DUMPING_COLS)
         if not self.ptr_within_mem_range(self.NextInstMemPtr):
             if(DUMP_ENABLE):
@@ -114,14 +115,15 @@ class Fetch:
                 else:
                     if (curr_inst.is_comp == False and remaining_bytes == MINIMAL_NUMBER_OF_BYTES_TO_FETCH):
                         self.half_inst_flag = True
-                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
+                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump,Window_Size)
                         return
                     self.fetchQueue.push(curr_inst)
                     #TODO - added!
+                    Window_Size+=1
                     Current_Window_Dump = self.dumper.Window_Dump_Append(Current_Window_Dump, curr_inst)
 
                     if not self.fetch_stats_update(curr_inst):
-                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
+                        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump,Window_Size)
                         return  # break the fetch due to branch
                     former_inst = curr_inst
                     remaining_bytes -= curr_inst.size_in_bytes
@@ -140,7 +142,8 @@ class Fetch:
                     remaining_bytes -= dummy_inst.size_in_bytes
             self.fetchQueue.back().start_tick = cur_tick
         # TODO - added!
-        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump)
+
+        self.dumper.Add_Current_Window_To_DF(Current_Window_Dump,Window_Size)
         #self.dumper.PrintDF()
         return True
 

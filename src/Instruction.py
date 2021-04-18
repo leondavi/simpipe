@@ -36,6 +36,8 @@ class Instruction:
         self.size_in_bytes = 0
         self.is_branch = False
         self.is_Load = False
+        self.read_registers = []
+        self.window_size = 0
 
     def str(self):
         if self.inst_name == "Bubble":

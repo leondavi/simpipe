@@ -114,6 +114,6 @@ MULDIV64 = {0: "MULW", 4: "DIVW", 5: "DIVUW", 6: "REMW", 7: "REMUW"}
 
 #Dumping Definitions
 DUMP_ENABLE = True
-DUMPING_COLS = ["Window Num","NAME","PC","COMPRESS","BRANCH", "BR_TAKEN","Load"]
+DUMPING_COLS = ["Window Index","NAME","PC","COMPRESS","BRANCH", "BR_TAKEN","Load","Window_Size"]
 CSV_DUMP_PATH = 'C:/Users/omrir/Desktop/University/Project/Dumps'
 DUMP_NAME = 'comp_dijestra'

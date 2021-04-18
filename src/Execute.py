@@ -9,7 +9,7 @@ class Execute:
     def __init__(self,Dumper,  params=dict()):
         self.num_threads = int(params["NUM_THREAD"]) if "NUM_THREAD" in params.keys() else NUM_THREADS
         self.num_stages = int(params["NUM_STAGES"]) if "NUM_STAGES" in params.keys() else NUM_STAGES
-        self.stages = FIFOQueue(self.num_stages)
+        self.stages = FIFOQueue(self.num_stages) # TODO - shouldnt be fetchqueue?
         self.stages.set_q_list([Instruction.empty_inst(0)] * self.num_stages)
         self.dumper=Dumper
         # Statistics
