@@ -55,15 +55,21 @@ class Decode(): #hey david
                 else:
                     next_field = instruction.m_inst[bit_range[0]]
                 next_field = str(next_field)
+                if('else' not in arr_tmp and next_field[::-1] not in arr_tmp):
+                    print(1)
                 if(next_field[::-1] not in arr_tmp):
                     arr_tmp=arr_tmp['else']
                 else:
                     arr_tmp = arr_tmp[next_field[::-1]]
 
+
+
         values, fields = self.decodeFields(instruction.m_inst, arr_tmp)
         instruction.name=arr_tmp['name']
         instruction.is_branch = arr_tmp['Branch']
-        instruction.is_Load = arr_tmp['Load']
+        #instruction.is_Load = arr_tmp['Load']
+        instruction.is_Load = instruction.name in LOAD.values()
+        instruction.muldiv = instruction.name in MULDIV_AND_MULDIV64.values()
 
         for i in range(len(fields)):
             if (fields[i]=='rd'):

@@ -1,6 +1,7 @@
 from Instruction import *
 from FIFOQueue import *
 import csv
+import numpy as np
 
 
 # Used as a stage In the pipeline
@@ -23,7 +24,7 @@ class Execute:
         self.thread_unit = None
         self.issue_unit = None
         self.fetch_unit = None
-
+        self.taken_i = 0
         self.generate_csv()
 
         # bp
@@ -73,13 +74,13 @@ class Execute:
                     self.flush()
             elif self.committed_inst.is_jump:
                 self.flush()
+
                 #TODO - OMRI DUMPING
+        current_inst_pc = self.committed_inst.pc
+        #if(self.committed_inst.is_dummy and current_inst_pc!='Z'):
+        #    self.dumper.Inst_DataSet.loc[np.logical_and(self.dumper.Inst_DataSet['PC'] == current_inst_pc , self.dumper.Inst_DataSet['Window Index'] == self.committed_inst.window_index) , 'DUMMY'] = 1
         if(self.committed_inst.br_taken == 1 and self.committed_inst.is_branch):
-            current_inst_pc = self.committed_inst.pc
-            #index = self.dumper.Inst_DataSet.index[self.dumper.Inst_DataSet['PC'] == current_inst_pc].to_list()
-            index = self.dumper.Inst_DataSet[self.dumper.Inst_DataSet['PC'] == current_inst_pc].index
-            print ("Branch Taken!")
-            self.dumper.Inst_DataSet.loc[self.dumper.Inst_DataSet.index == index[0], 'BR_TAKEN'] = 1
+            self.dumper.Inst_DataSet.loc[np.logical_and(self.dumper.Inst_DataSet['PC'] == current_inst_pc , self.dumper.Inst_DataSet['Window Index'] == self.committed_inst.window_index) , 'BR_TAKEN'] = 1
 
     def update_arch_state(self):
         tid = self.committed_inst.tid

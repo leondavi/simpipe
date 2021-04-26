@@ -93,7 +93,7 @@ class Fetch:
             self.half_inst_flag = False
         #TODO added!
         Current_Window_Dump = self.dumper.Window_Dump_Append(Current_Window_Dump,first_inst)
-
+        first_inst.window_index = self.dumper.window
         former_inst = first_inst  # Used inside the loop to track last instruction
         empty_inst = False  # Once set, the rest instruction that pushed are empty
 
@@ -106,6 +106,9 @@ class Fetch:
                 return False
             else:
                 curr_inst = Instruction.inst_from_row(self.memory, self.NextInstMemPtr, self.tid)
+                if(curr_inst.pc=='118698'):
+                    print(1)
+                curr_inst.window_index = self.dumper.window
                 delta_pc = curr_inst.delta_pc(former_inst)
                 # if next inst is not comp and there are only 2 bytes left to fetch - inserting a dummy with length 2 - #
                 # Check that next instruction is sequential in memory
@@ -133,6 +136,8 @@ class Fetch:
                 if empty_inst:
                     dummy_inst = Instruction.empty_inst(self.tid, "dummy", False)
                     dummy_inst.pc = str(int(first_inst.pc) +  (self.fetch_size - remaining_bytes))
+                    dummy_inst.is_dummy = True
+                    Current_Window_Dump = self.dumper.Window_Dump_Append(Current_Window_Dump, dummy_inst)
                     self.fetchQueue.push(dummy_inst)
                     self.dummy_inst_count += 1
                     if(remaining_bytes >= 4):

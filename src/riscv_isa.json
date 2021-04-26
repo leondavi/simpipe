@@ -647,7 +647,7 @@
                 "last_level":true,
 				"Branch":false,
 				"Load": true,
-                "fields":["rs1","rs2","imm"],
+                "fields":["rs1","rd","imm"],
                 "separated_imm":false,
                 "rd":[7,11],
                 "rs1":[15,19],
@@ -999,80 +999,6 @@
 					}
 				}
 		},
-		"01110":
-			{
-			"name":"W",
-			"last_level":false,
-			"bit_range":[12,14],
-			"000":
-				{
-				"name":"ADDW/SUBW",
-				"last_level":false,
-				"bit_range":[30,31],
-				"00":
-					{
-					"name": "ADDW",
-					"last_level":true,
-					"Branch":false,
-					"Load": false,
-					"fields":["rd","rs1","rs2"],
-					"rd":[7,11],
-					"rs1":[15,19],
-					"rs2":[20,24]
-					},
-				"01":
-					{
-					"name": "SUBW",
-					"last_level":true,
-					"Branch":false,
-					"Load": false,
-					"fields":["rd","rs1","rs2"],
-					"rd":[7,11],
-					"rs1":[15,19],
-					"rs2":[20,24]
-					}
-
-				},
-			"001":
-				{
-				"name": "SLLW",
-				"last_level":true,
-				"Branch":false,
-				"Load": false,
-				"fields":["rd","rs1","rs2"],
-				"rd":[7,11],
-				"rs1":[15,19],
-				"rs2":[20,24]
-				},
-			"101":
-				{
-				"name":"SRLW/SRAW",
-				"last_level":false,
-				"bit_range":[30,31],
-				"00":
-					{
-					"name": "SRLW",
-					"last_level":true,
-					"Branch":false,
-					"Load": false,
-					"fields":["rd","rs1","rs2"],
-					"rd":[7,11],
-					"rs1":[15,19],
-					"rs2":[20,24]
-					},
-				"01":
-					{
-					"name": "SRAW",
-					"last_level":true,
-					"Branch":false,
-					"Load": false,
-					"fields":["rd","rs1","rs2"],
-					"rd":[7,11],
-					"rs1":[15,19],
-					"rs2":[20,24]
-					}
-				}
-		},
 		"01100":
 		{
 			"name":"RV32M",
@@ -1327,12 +1253,51 @@
 		},
 		"01110":
 		{
-		"name":"RV64M",
+		"name":"RV64M/RV64I",
 		"last_level":false,
 		"bit_range":[12,14],
 		"000":
 			{
-			"name": "MULW",
+			"name": "MULW/ADDW/SUBW",
+			"last_level":false,
+			"bit_range":[25,31],
+			"0000001":
+				{
+				"name": "MULW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				},
+			"0000000":
+				{
+				"name": "ADDW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				},
+			"0100000":
+				{
+				"name": "SUBW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				}
+			},
+		"001":
+			{
+			"name": "SLLW",
 			"last_level":true,
 			"Branch":false,
 			"Load": false,
@@ -1354,14 +1319,42 @@
 			},
 		"101":
 			{
-			"name": "DIVUW",
-			"last_level":true,
-			"Branch":false,
-			"Load": false,
-			"fields":["rd","rs1","rs2"],
-			"rd":[7,11],
-			"rs1":[15,19],
-			"rs2":[20,24]
+			"name": "DIVUW/SRLW/SRAW",
+			"last_level":false,
+			"bit_range":[25,30],
+			"000000":
+				{
+				"name": "SRLW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				},
+			"000001":
+				{
+				"name": "DIVUW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				},
+			"100000":
+				{
+				"name": "SRAW",
+				"last_level":true,
+				"Branch":false,
+				"Load": false,
+				"fields":["rd","rs1","rs2"],
+				"rd":[7,11],
+				"rs1":[15,19],
+				"rs2":[20,24]
+				}
 			},
 		"110":
 			{

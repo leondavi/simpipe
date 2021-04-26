@@ -177,13 +177,13 @@ class AEAttribute:
     def add_loss_val(self, loss):
         self.loss_val.append(loss)
 
-    def generate_ae(self, layers, lr, actFunc=F.elu):
+    def generate_ae(self, layers, lr, actFunc=nn.elu):
         self.layers = layers
         self.lr = lr
         self.act_func = actFunc
         self.ae = Autoencoder(layers, actFunc)
 
-    def set_ae(self, ae: Autoencoder, layers, lr, actFunc=F.elu):
+    def set_ae(self, ae: Autoencoder, layers, lr, actFunc=nn.elu):
         self.layers = layers
         self.lr = lr
         self.act_func = actFunc
@@ -247,3 +247,6 @@ def load_torch_models(models_path) -> dict:
                 autoencoders_dict[key] = ae_attr
 
     return autoencoders_dict
+
+
+omri_ae = Autoencoder()

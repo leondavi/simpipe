@@ -38,6 +38,9 @@ class Instruction:
         self.is_Load = False
         self.read_registers = []
         self.window_size = 0
+        self.window_index = 0
+        self.muldiv = False
+        self.is_dummy = False
 
     def str(self):
         if self.inst_name == "Bubble":

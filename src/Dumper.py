@@ -12,7 +12,7 @@ class Dumper(): #hey david
 
     def Window_Dump_Append(self,Current_Window,Instruction):
         #["NAME","PC","COMPRESS","BRANCH", "BR_TAKEN","Load"]
-        df_temp = pd.DataFrame([[self.window,Instruction.name, Instruction.pc,Instruction.is_comp, Instruction.is_branch,0,Instruction.is_Load,Instruction.window_size]], columns=DUMPING_COLS)
+        df_temp = pd.DataFrame([[self.window,Instruction.name,Instruction.is_dummy, Instruction.pc,Instruction.is_comp, Instruction.is_branch,0,Instruction.is_Load,Instruction.window_size,Instruction.muldiv]], columns=DUMPING_COLS)
         return Current_Window.append(df_temp)
 
     def Add_Current_Window_To_DF(self,Current_Window,Window_Size):
