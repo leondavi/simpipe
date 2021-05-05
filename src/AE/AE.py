@@ -10,7 +10,7 @@ from Definitions import *
 
 
 class Autoencoder(nn.Module):
-    def __init__(self, halfNetLayers=[32, 16, 8], act_type=nn.elu):
+    def __init__(self, halfNetLayers=[3, 2, 2], act_type=nn.ELU):
         super(Autoencoder, self).__init__()
         self.halfNetLayers = halfNetLayers
         self.layers_sizes = halfNetLayers + list(reversed(halfNetLayers)) #32 16 8 8 16 32
@@ -75,6 +75,7 @@ def predict(model, input_df, win_size):
     # model.to(device)
 
     inout_data = torch.tensor(input_df.values.flatten())  # .cuda()
+
     outputs = model.forward(inout_data.float())
     loss = criterion(outputs, inout_data.float())
     return loss.data.numpy().item()  # .cpu().numpy()
@@ -83,6 +84,8 @@ def predict(model, input_df, win_size):
 '''
 nn_complexity - larger mean more hidden nodes - more complexity
 '''
+MODEL_COMPLEXITY = 64
+MODEL_DEPTH_LIST = [32, 16, 8,16,32]
 LIST_OF_LAYERS_SIZES_HASH = dict()
 
 
@@ -177,13 +180,13 @@ class AEAttribute:
     def add_loss_val(self, loss):
         self.loss_val.append(loss)
 
-    def generate_ae(self, layers, lr, actFunc=nn.elu):
+    def generate_ae(self, layers, lr, actFunc=nn.ELU):
         self.layers = layers
         self.lr = lr
         self.act_func = actFunc
         self.ae = Autoencoder(layers, actFunc)
 
-    def set_ae(self, ae: Autoencoder, layers, lr, actFunc=nn.elu):
+    def set_ae(self, ae: Autoencoder, layers, lr, actFunc=nn.ELU):
         self.layers = layers
         self.lr = lr
         self.act_func = actFunc
@@ -217,7 +220,7 @@ class AEAttribute:
                 "train dict": self.train_dict
                 }
 
-
+Path = ""
 def load_torch_model(modelfile_path: Path):
     ''':arg
     returns a tuple of ae_attr and key
@@ -249,4 +252,3 @@ def load_torch_models(models_path) -> dict:
     return autoencoders_dict
 
 
-omri_ae = Autoencoder()

@@ -115,4 +115,4 @@ MULDIV_AND_MULDIV64.update(MULDIV64)
 DUMP_ENABLE = True
 DUMPING_COLS = ["Window Index","NAME","DUMMY","PC","COMPRESS","BRANCH", "BR_TAKEN","Load","Window_Size","MUL/DIV"]
 CSV_DUMP_PATH = 'C:/Users/omrir/Desktop/University/Project/Dumps'
-DUMP_NAME = 'COREMARK_COMP_100k'
+DUMP_NAME = 'FFT_COMP_100k'
