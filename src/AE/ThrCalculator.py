@@ -25,7 +25,7 @@ class ThrCalculator():
 #compute new thr value
     def gen_final_thr(self):
         self.current_thr = (self.ema_normal+self.ema_event)/2
-#main of TheCalculator
+#main of TheCa lculator
     def Thr_calculator_step(self,error):
         self.ema_update(error)
         self.thr_event_update()

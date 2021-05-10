@@ -3,17 +3,13 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from torch import optim
+import AE_Definitions
+from AE_Definitions import *
+from DataOrganizor import *
 import numpy
 from numpy import genfromtxt
 
-FEATURES = 8
-EPOCHS = 100
-EPOCHS_SIZE = 500
 
-ENCODER_IN_SIZE = 8
-ENCODER_OUT_SIZE = 5
-DECODER_IN_SIZE = 3
-DECODER_OUT_SIZE = ENCODER_OUT_SIZE
 
 class AE(nn.Module):
     def __init__(self, **kwargs):
@@ -33,13 +29,13 @@ class AE(nn.Module):
 
     def forward(self, features):
         activation = self.encoder_hidden_layer(features)
-        activation = torch.relu(activation)
+        activation = torch.LeakyReLU(activation)
         code = self.encoder_output_layer(activation)
-        code = torch.relu(code)
+        code = torch.LeakyReLU(code)
         activation = self.decoder_hidden_layer(code)
-        activation = torch.relu(activation)
+        activation = torch.LeakyReLU(activation)
         activation = self.decoder_output_layer(activation)
-        reconstructed = torch.relu(activation)
+        reconstructed = torch.LeakyReLU(activation)
         return reconstructed
 
     def createData(self,features,epochs_number,epochs_size):
@@ -59,9 +55,7 @@ class AE(nn.Module):
             summation = summation + squared_difference  # taking a sum of all the differences
         return summation / n
 
-def getDataFromCSV(self,Path):
-    my_data = genfromtxt(Path, delimiter=',')
-    return my_data
+
 
 # TODO - added disable functions - done
 def disableFeature(grad_tensor,FeatIdx,totalFeat,nextLayerSize):
@@ -93,19 +87,22 @@ criterion = nn.MSELoss()
 #Data Generation
 train_loader = model.createData(FEATURES,EPOCHS,EPOCHS_SIZE)
 train_loader = torch.FloatTensor(train_loader)
+
+Data1 = DataOrganizor(r"C:\Users\omrir\Desktop\University\Project\Dumps\FFT\‏‏FFT_COMP_100k - Analyzed.csv")
 #data = getDataFromCSV(r"C:\Users\omrir\Desktop\University\Project\Dumps\FFT\‏‏FFT_COMP_100k - Analyzed.csv")
 #data = data[:,0:FEATURES]
 
 for epoch in range(EPOCHS):
     loss = 0
-    for batch_features in train_loader:
+    for i in range(WINDOWS_NUMBER):
+        CurWindow = Data1.getNextWindow()
         # reset the gradients back to zero
         # PyTorch accumulates gradients on subsequent backward passes
         optimizer.zero_grad()
         # compute reconstructions
-        outputs = model(batch_features)
+        outputs = model(CurWindow)
         # compute training reconstruction loss
-        train_loss = criterion(outputs, batch_features)
+        train_loss = criterion(outputs, CurWindow)
         # compute accumulated gradients
         train_loss.backward()
 
@@ -125,7 +122,7 @@ for epoch in range(EPOCHS):
     loss = loss / len(train_loader)
 
     # display the epoch training loss
-    print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, batch_features, loss))
+    print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, CurWindow, loss))
 
 
 pred1 = model.forward(torch.FloatTensor([1,2,3,4,5,6,7,8]))
